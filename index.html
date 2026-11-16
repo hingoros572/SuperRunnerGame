@@ -4,103 +4,56 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Super Monkey Runner</title>
+<title>Super Monkey Runner 200</title>
 <meta name="theme-color" content="#101b35">
 <link rel="manifest" href="manifest.json">
-
 <style>
 *{box-sizing:border-box}
-body{
- margin:0;
- background:#101b35;
- color:white;
- font-family:Arial,sans-serif;
- text-align:center;
-}
-h1{margin:12px 0;color:#ffd43b}
-#info{
- display:flex;
- justify-content:center;
- gap:12px;
- flex-wrap:wrap;
- padding:8px;
- font-weight:bold;
-}
-canvas{
- width:100%;
- display:block;
- background:#8edcff;
- border:3px solid white;
- border-radius:10px;
- touch-action:manipulation;
-}
-#gameBox{
- position:relative;
- width:100%;
- max-width:850px;
- margin:auto;
-}
-#panel{
- position:absolute;
- inset:0;
- display:flex;
- align-items:center;
- justify-content:center;
- background:#0009;
- padding:15px;
-}
-#message{
- background:#15284a;
- padding:22px;
- border:3px solid #ffd43b;
- border-radius:16px;
- max-width:90%;
- width:380px;
-}
+body{margin:0;background:#101b35;color:white;font-family:Arial;text-align:center}
+h1{color:#ffd43b;margin:12px 0}
+#info{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;padding:10px;font-weight:bold}
+#gameBox{position:relative;width:100%;max-width:850px;margin:auto}
+canvas{width:100%;display:block;border:3px solid white;border-radius:10px;touch-action:manipulation}
+#panel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#0009;padding:15px}
+#message{background:#15284a;padding:20px;border:3px solid #ffd43b;border-radius:16px;width:380px;max-width:95%}
 #message h2{color:#ffd43b}
-button{
- background:#ffd43b;
- color:#17213a;
- border:0;
- border-radius:10px;
- padding:13px 22px;
- font-size:18px;
- font-weight:bold;
- margin:8px;
-}
-#hint{padding:10px;color:#ddd}
+button{background:#ffd43b;color:#17213a;border:0;border-radius:10px;padding:13px 22px;font-size:18px;font-weight:bold;margin:8px}
+#hint{padding:12px;color:#ddd}
+#progress{height:9px;background:#38445c;max-width:850px;margin:5px auto;border-radius:10px;overflow:hidden}
+#bar{height:100%;width:0;background:#ffd43b}
 </style>
 </head>
-
 <body>
 
 <h1>🐵 SUPER MONKEY RUNNER</h1>
 
 <div id="info">
- <span id="level">Level: 1</span>
+ <span id="level">Level: 1/200</span>
  <span id="difficulty">NORMAL</span>
+ <span id="timer">Time: 04:00</span>
  <span id="score">Score: 0</span>
  <span id="coins">Coins: 0</span>
  <span id="lives">❤️❤️❤️</span>
 </div>
 
-<div id="gameBox">
- <canvas id="game" width="800" height="400"></canvas>
+<div id="progress"><div id="bar"></div></div>
 
- <div id="panel">
-  <div id="message">
-   <h2>🐵 Super Monkey Runner</h2>
-   <p>200 Levels Challenge!</p>
-   <p>❤️ 3 Lives System</p>
-   <p>Jump karo aur coins collect karo!</p>
-   <button onclick="startGame()">PLAY GAME</button>
-  </div>
+<div id="gameBox">
+<canvas id="game" width="800" height="400"></canvas>
+<div id="panel">
+ <div id="message">
+  <h2>🐵 Super Monkey Runner</h2>
+  <p>200 Levels Challenge!</p>
+  <p>❤️ 3 Lives System</p>
+  <p>Har level ka apna time limit!</p>
+  <button onclick="startGame()">PLAY GAME</button>
  </div>
+</div>
 </div>
 
 <div id="hint">
- Mobile: Screen par tap karke jump karein.<br>
- Computer: Space ya Up Arrow dabayein.
+Mobile: Screen par tap karke jump karein.<br>
+Computer: Space ya Up Arrow dabayein.
 </div>
 
 <script>
@@ -112,32 +65,28 @@ const message=document.getElementById("message");
 
 const levelText=document.getElementById("level");
 const difficultyText=document.getElementById("difficulty");
+const timerText=document.getElementById("timer");
 const scoreText=document.getElementById("score");
 const coinsText=document.getElementById("coins");
 const livesText=document.getElementById("lives");
+const bar=document.getElementById("bar");
 
 let level=1;
 let score=0;
 let coins=0;
-let distance=0;
+let lives=3;
 let running=false;
 let frame=0;
 let speed=5;
-
-let lives=3;
 let invulnerable=0;
-
+let levelStartTime=0;
+let levelDuration=240000;
 let obstacles=[];
 let treasures=[];
 
 const monkey={
- x:100,
- y:280,
- w:55,
- h:65,
- vy:0,
- ground:280,
- jumping:false
+ x:100,y:280,w:55,h:65,
+ vy:0,ground:280,jumping:false
 };
 
 function difficultyName(){
@@ -147,8 +96,19 @@ function difficultyName(){
  return "VERY HARD";
 }
 
-function levelTarget(){
- return 700+level*15;
+function getLevelDuration(){
+ if(level<=50)return 4*60*1000;
+ if(level<=100)return 5*60*1000;
+ if(level<=150)return 6*60*1000;
+ return 8*60*1000;
+}
+
+function formatTime(ms){
+ let seconds=Math.max(0,Math.ceil(ms/1000));
+ let minutes=Math.floor(seconds/60);
+ let remaining=seconds%60;
+ return String(minutes).padStart(2,"0")+":"+
+ String(remaining).padStart(2,"0");
 }
 
 function gameSpeed(){
@@ -168,14 +128,15 @@ function updateInfo(){
 
 function startGame(){
  score=0;
- distance=0;
  frame=0;
  obstacles=[];
  treasures=[];
- speed=gameSpeed();
-
  lives=3;
  invulnerable=0;
+
+ speed=gameSpeed();
+ levelDuration=getLevelDuration();
+ levelStartTime=performance.now();
 
  monkey.y=monkey.ground;
  monkey.vy=0;
@@ -188,7 +149,6 @@ function startGame(){
 
 function jump(){
  if(!running)return;
-
  if(!monkey.jumping){
   monkey.vy=-14;
   monkey.jumping=true;
@@ -208,23 +168,18 @@ function drawBackground(){
  let sky=ctx.createLinearGradient(0,0,0,400);
  sky.addColorStop(0,"#63c9ff");
  sky.addColorStop(1,"#d5f7ff");
-
  ctx.fillStyle=sky;
  ctx.fillRect(0,0,800,400);
 
- // Sun
  ctx.fillStyle="#ffdf55";
  ctx.beginPath();
  ctx.arc(690,65,35,0,Math.PI*2);
  ctx.fill();
 
- // Clouds
  ctx.fillStyle="white";
-
  for(let i=0;i<4;i++){
   let x=(i*230-frame*.3)%950;
   if(x<-100)x+=950;
-
   ctx.beginPath();
   ctx.arc(x,85,22,0,Math.PI*2);
   ctx.arc(x+25,75,28,0,Math.PI*2);
@@ -232,29 +187,22 @@ function drawBackground(){
   ctx.fill();
  }
 
- // Hills
  ctx.fillStyle="#60bd62";
  ctx.beginPath();
  ctx.moveTo(0,280);
-
  for(let x=0;x<=800;x+=100){
   ctx.quadraticCurveTo(x+50,210,x+100,280);
  }
-
  ctx.lineTo(800,400);
  ctx.lineTo(0,400);
  ctx.fill();
 
- // Ground
  ctx.fillStyle="#348a3c";
  ctx.fillRect(0,345,800,55);
-
  ctx.fillStyle="#e7c47b";
  ctx.fillRect(0,360,800,40);
 
- // Road marks
  ctx.fillStyle="white";
-
  for(let i=0;i<10;i++){
   let x=(i*110-frame*speed)%900;
   if(x<0)x+=900;
@@ -263,13 +211,10 @@ function drawBackground(){
 }
 
 function drawMonkey(){
- let x=monkey.x;
- let y=monkey.y;
-
+ let x=monkey.x,y=monkey.y;
  ctx.save();
 
- // Hit hone par blinking
- if(invulnerable>0 && Math.floor(frame/5)%2===0){
+ if(invulnerable>0&&Math.floor(frame/5)%2===0){
   ctx.globalAlpha=.35;
  }
 
@@ -349,7 +294,7 @@ function drawMonkey(){
  ctx.lineTo(x+55,y+48);
  ctx.stroke();
 
- // Legs
+ // Running legs
  let swing=Math.sin(frame*.3)*7;
  ctx.strokeStyle="#793d18";
  ctx.lineWidth=9;
@@ -364,19 +309,17 @@ function drawMonkey(){
 }
 
 function spawnItems(){
- if(frame%90===0){
-  obstacles.push({
-   x:820,
-   y:320,
-   w:38,
-   h:40
-  });
+ let obstacleGap=level>150?65:level>100?75:level>50?85:100;
+ let treasureGap=65;
+
+ if(frame%obstacleGap===0){
+  obstacles.push({x:820,y:320,w:38,h:40});
  }
 
- if(frame%55===0){
+ if(frame%treasureGap===0){
   treasures.push({
    x:820,
-   y:230+Math.random()*80,
+   y:220+Math.random()*90,
    type:Math.random()<.25?"banana":"coin",
    taken:false
   });
@@ -387,24 +330,20 @@ function drawItems(){
  obstacles.forEach(o=>{
   ctx.fillStyle="#8b4b20";
   ctx.fillRect(o.x,o.y,o.w,o.h);
-
   ctx.strokeStyle="#4e2914";
   ctx.lineWidth=4;
   ctx.strokeRect(o.x,o.y,o.w,o.h);
-
   ctx.fillStyle="#d69a51";
   ctx.fillRect(o.x+5,o.y+8,o.w-10,5);
  });
 
  treasures.forEach(t=>{
   if(t.taken)return;
-
   if(t.type==="coin"){
    ctx.fillStyle="#ffd700";
    ctx.beginPath();
    ctx.arc(t.x,t.y,12,0,Math.PI*2);
    ctx.fill();
-
    ctx.strokeStyle="#b77b00";
    ctx.lineWidth=3;
    ctx.stroke();
@@ -427,11 +366,8 @@ function loseLife(){
 
  lives--;
  invulnerable=100;
-
- // Bandar ko thoda peeche aur upar bachao
  monkey.vy=-7;
  monkey.jumping=true;
-
  updateInfo();
 
  if(lives<=0){
@@ -442,13 +378,11 @@ function loseLife(){
 function endGame(){
  running=false;
  panel.style.display="flex";
-
  message.innerHTML=
  "<h2>😢 GAME OVER</h2>"+
  "<p>Level: "+level+"</p>"+
  "<p>Score: "+score+"</p>"+
  "<p>Coins: "+coins+"</p>"+
- "<p>Dobara koshish karein!</p>"+
  "<button onclick='startGame()'>TRY AGAIN</button>";
 }
 
@@ -459,7 +393,6 @@ function completeLevel(){
  if(level===200){
   message.innerHTML=
   "<h2>🏆 YOU ARE THE CHAMPION!</h2>"+
-  "<p>Congratulations!</p>"+
   "<p>Aapne saare 200 levels complete kar liye!</p>"+
   "<p>Total Coins: "+coins+"</p>"+
   "<button onclick='restartAll()'>PLAY AGAIN</button>";
@@ -467,9 +400,7 @@ function completeLevel(){
   message.innerHTML=
   "<h2>🎉 LEVEL COMPLETE!</h2>"+
   "<p>Level "+level+" complete ho gaya!</p>"+
-  "<p>Score: "+score+"</p>"+
-  "<p>Coins: "+coins+"</p>"+
-  "<p>Agla level shuru karne ke liye button dabayein.</p>"+
+  "<p>Agla level shuru karein?</p>"+
   "<button onclick='nextLevel()'>NEXT LEVEL</button>";
  }
 }
@@ -490,12 +421,20 @@ function update(){
 
  frame++;
  speed=gameSpeed();
- distance+=speed;
- score++;
 
- if(invulnerable>0){
-  invulnerable--;
+ // Timer
+ let elapsed=performance.now()-levelStartTime;
+ let remaining=levelDuration-elapsed;
+
+ timerText.textContent="Time: "+formatTime(remaining);
+ bar.style.width=Math.min(100,(elapsed/levelDuration)*100)+"%";
+
+ if(remaining<=0){
+  completeLevel();
+  return;
  }
+
+ if(invulnerable>0)invulnerable--;
 
  // Monkey movement
  monkey.y+=monkey.vy;
@@ -513,7 +452,7 @@ function update(){
  obstacles.forEach(o=>{
   o.x-=speed;
 
-  if(invulnerable<=0 && collision(
+  if(invulnerable<=0&&collision(
    {x:monkey.x+8,y:monkey.y+10,w:38,h:58},
    o
   )){
@@ -523,16 +462,15 @@ function update(){
 
  if(!running)return;
 
- // Coins and bananas
+ // Collectibles
  treasures.forEach(t=>{
   t.x-=speed;
 
-  if(!t.taken && collision(
+  if(!t.taken&&collision(
    {x:monkey.x,y:monkey.y,w:55,h:65},
    {x:t.x-12,y:t.y-12,w:24,h:24}
   )){
    t.taken=true;
-
    if(t.type==="coin"){
     coins++;
     score+=10;
@@ -545,11 +483,8 @@ function update(){
  obstacles=obstacles.filter(o=>o.x>-60);
  treasures=treasures.filter(t=>t.x>-60&&!t.taken);
 
+ score++;
  updateInfo();
-
- if(distance>=levelTarget()){
-  completeLevel();
- }
 }
 
 function draw(){
@@ -559,11 +494,7 @@ function draw(){
 
  ctx.fillStyle="#17213a";
  ctx.font="bold 18px Arial";
-
- ctx.fillText(
-  "Target: "+Math.floor(distance)+" / "+levelTarget(),
-  20,30
- );
+ ctx.fillText("Level "+level+" - "+difficultyName(),20,30);
 }
 
 function loop(){
@@ -573,6 +504,7 @@ function loop(){
 }
 
 updateInfo();
+timerText.textContent="Time: 04:00";
 draw();
 loop();
 
@@ -583,6 +515,5 @@ if("serviceWorker" in navigator){
  });
 }
 </script>
-
 </body>
 </html>
