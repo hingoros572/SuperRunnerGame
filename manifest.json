@@ -1,0 +1,12 @@
+
+{
+  "name": "Super Runner Game",
+  "short_name": "SuperRunner",
+  "description": "An exciting 2D endless runner game",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#101b35",
+  "theme_color": "#101b35",
+  "icons": []
+}
