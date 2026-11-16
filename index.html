@@ -1,64 +1,412 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101b35">
+<link rel="manifest" href="./manifest.json">
+<title>Super Monkey Runner</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#101b35;color:white;
+ font-family:Arial;text-align:center;
+}
+h1{color:#ffd43b;margin:12px}
+#info{font-size:19px;margin:12px}
+canvas{
+ display:block;width:96%;max-width:800px;
+ height:auto;margin:12px auto;
+ border:3px solid white;border-radius:14px;
+ background:#80d9ff;touch-action:manipulation;
+}
+button{
+ padding:13px 16px;margin:5px;
+ border:0;border-radius:12px;
+ background:#ffbd24;color:#222;
+ font-size:16px;font-weight:bold;
+}
+#message{min-height:35px}
+</style>
+</head>
+
+<body>
+
+<h1>🐵 SUPER MONKEY RUNNER</h1>
+
+<div id="info">
+ <span id="score">Score: 0</span> |
+ <span id="coins">Coins: 0</span> |
+ <span id="bananas">Bananas: 0</span>
+</div>
+
+<canvas id="game" width="800" height="400"></canvas>
+
+<div>
+ <button onclick="startGame()">▶ PLAY</button>
+ <button onclick="jump()">⬆ JUMP</button>
+ <button onclick="toggleLanguage()">🌐 اردو / English</button>
+</div>
+
+<p id="message">Tap PLAY to start!</p>
+
+<script>
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+
+let running=false;
+let score=0,coins=0,bananas=0;
+let frame=0,speed=5;
+let obstacles=[],gold=[],fruit=[];
+let language="en";
+let animationId=0;
+
+const player={
+ x:100,y:285,w:44,h:65,
+ vy:0,jumping:false
+};
+
+function say(en,ur){
+ return language==="en"?en:ur;
+}
+
+// Background
+function drawBackground(){
+ ctx.fillStyle="#80d9ff";
+ ctx.fillRect(0,0,800,400);
+
+ // Sun
+ ctx.fillStyle="#fff17a";
+ ctx.beginPath();
+ ctx.arc(680,65,35,0,Math.PI*2);
+ ctx.fill();
+
+ // Clouds
+ ctx.fillStyle="white";
+ [120,350,550].forEach(x=>{
+  ctx.beginPath();
+  ctx.arc(x,90,20,0,Math.PI*2);
+  ctx.arc(x+25,85,27,0,Math.PI*2);
+  ctx.arc(x+50,95,18,0,Math.PI*2);
+  ctx.fill();
+ });
+
+ // Hills
+ ctx.fillStyle="#43ae52";
+ ctx.beginPath();
+ ctx.arc(100,350,110,Math.PI,0);
+ ctx.arc(350,350,140,Math.PI,0);
+ ctx.arc(650,350,120,Math.PI,0);
+ ctx.fill();
+
+ // Trees
+ [60,470,730].forEach(x=>{
+  ctx.fillStyle="#70421f";
+  ctx.fillRect(x,270,15,80);
+  ctx.fillStyle="#168b45";
+  ctx.beginPath();
+  ctx.arc(x+8,260,30,0,Math.PI*2);
+  ctx.fill();
+ });
+
+ // Road
+ ctx.fillStyle="#444";
+ ctx.fillRect(0,350,800,50);
+ ctx.fillStyle="white";
+
+ for(let i=0;i<9;i++){
+  let x=i*110-frame*speed%110;
+  ctx.fillRect(x,372,50,5);
+ }
+}
+
+// Monkey character
 function drawPlayer(){
 
- // Bandar ke kaan
- ctx.fillStyle="#8B4513";
+ let bounce=running && !player.jumping ?
+ Math.sin(frame*0.35)*3 : 0;
+
+ let x=player.x;
+ let y=player.y+bounce;
+
+ // Tail
+ ctx.strokeStyle="#8b4513";
+ ctx.lineWidth=6;
  ctx.beginPath();
- ctx.arc(player.x+5,player.y+8,10,0,Math.PI*2);
- ctx.arc(player.x+37,player.y+8,10,0,Math.PI*2);
+ ctx.moveTo(x+35,y+42);
+ ctx.quadraticCurveTo(x+65,y+20,x+48,y+7);
+ ctx.stroke();
+
+ // Ears
+ ctx.fillStyle="#8b4513";
+ ctx.beginPath();
+ ctx.arc(x+5,y+9,11,0,Math.PI*2);
+ ctx.arc(x+39,y+9,11,0,Math.PI*2);
  ctx.fill();
 
- // Bandar ka chehra
- ctx.fillStyle="#A0522D";
+ // Face
+ ctx.fillStyle="#a0522d";
  ctx.beginPath();
- ctx.arc(player.x+21,player.y+15,20,0,Math.PI*2);
+ ctx.arc(x+22,y+15,21,0,Math.PI*2);
  ctx.fill();
 
- // Chehre ka halka hissa
- ctx.fillStyle="#FFD39B";
+ // Face center
+ ctx.fillStyle="#ffd39b";
  ctx.beginPath();
- ctx.ellipse(player.x+21,player.y+21,13,10,0,0,Math.PI*2);
+ ctx.ellipse(x+22,y+22,14,10,0,0,Math.PI*2);
  ctx.fill();
 
- // Aankhein
+ // Eyes
  ctx.fillStyle="white";
  ctx.beginPath();
- ctx.arc(player.x+14,player.y+12,5,0,Math.PI*2);
- ctx.arc(player.x+28,player.y+12,5,0,Math.PI*2);
+ ctx.arc(x+15,y+12,5,0,Math.PI*2);
+ ctx.arc(x+29,y+12,5,0,Math.PI*2);
  ctx.fill();
 
  ctx.fillStyle="black";
- ctx.fillRect(player.x+15,player.y+11,3,4);
- ctx.fillRect(player.x+29,player.y+11,3,4);
+ ctx.fillRect(x+16,y+11,3,4);
+ ctx.fillRect(x+30,y+11,3,4);
 
- // Muskurata munh
+ // Smile
  ctx.strokeStyle="#54220c";
  ctx.lineWidth=2;
  ctx.beginPath();
- ctx.arc(player.x+21,player.y+22,6,0,Math.PI);
+ ctx.arc(x+22,y+22,6,0,Math.PI);
  ctx.stroke();
 
- // Bandar ka jism
- ctx.fillStyle="#8B4513";
- ctx.fillRect(player.x+8,player.y+34,28,22);
+ // Body
+ ctx.fillStyle="#8b4513";
+ ctx.fillRect(x+8,y+35,28,23);
 
- // Haath
- ctx.fillRect(player.x,player.y+36,10,7);
- ctx.fillRect(player.x+34,player.y+36,10,7);
+ // Arms
+ let arm=Math.sin(frame*.35)*5;
+ ctx.fillStyle="#8b4513";
+ ctx.fillRect(x,y+36+arm,10,7);
+ ctx.fillRect(x+35,y+36-arm,10,7);
 
- // Pair
+ // Animated legs
  ctx.fillStyle="#5b2d13";
- ctx.fillRect(player.x+8,player.y+52,12,8);
- ctx.fillRect(player.x+25,player.y+52,12,8);
 
- // Ghoomti hui dum
- ctx.strokeStyle="#8B4513";
- ctx.lineWidth=5;
- ctx.beginPath();
- ctx.moveTo(player.x+35,player.y+43);
- ctx.quadraticCurveTo(
-  player.x+60,player.y+25,
-  player.x+47,player.y+8
- );
- ctx.stroke();
+ let legMove=running&&!player.jumping?
+ Math.sin(frame*.35)*8:0;
+
+ ctx.save();
+ ctx.translate(x+14,y+53);
+ ctx.rotate(legMove*Math.PI/180);
+ ctx.fillRect(-6,0,12,9);
+ ctx.restore();
+
+ ctx.save();
+ ctx.translate(x+31,y+53);
+ ctx.rotate(-legMove*Math.PI/180);
+ ctx.fillRect(-6,0,12,9);
+ ctx.restore();
 }
+
+// Objects
+function drawObjects(){
+
+ obstacles.forEach(o=>{
+  ctx.fillStyle="#995020";
+  ctx.fillRect(o.x,o.y,o.w,o.h);
+  ctx.fillStyle="#d9822b";
+  ctx.fillRect(o.x+5,o.y+7,o.w-10,8);
+ });
+
+ gold.forEach(c=>{
+  ctx.fillStyle="#ffca28";
+  ctx.beginPath();
+  ctx.arc(c.x,c.y,12,0,Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle="#fff";
+  ctx.font="bold 14px Arial";
+  ctx.fillText("$",c.x-5,c.y+5);
+ });
+
+ fruit.forEach(b=>{
+  // Banana
+  ctx.font="28px Arial";
+  ctx.fillText("🍌",b.x-14,b.y+10);
+ });
+}
+
+// Collision
+function collision(a,b){
+ return a.x < b.x+b.w &&
+ a.x+a.w > b.x &&
+ a.y < b.y+b.h &&
+ a.y+a.h > b.y;
+}
+
+// Start game
+function startGame(){
+ cancelAnimationFrame(animationId);
+
+ score=0;
+ coins=0;
+ bananas=0;
+ frame=0;
+ speed=5;
+
+ obstacles=[];
+ gold=[];
+ fruit=[];
+
+ player.y=285;
+ player.vy=0;
+ player.jumping=false;
+
+ running=true;
+
+ document.getElementById("message").textContent=
+ say("Collect coins and bananas!","سکے اور کیلے جمع کریں!");
+
+ update();
+}
+
+// Jump
+function jump(){
+ if(running&&!player.jumping){
+  player.vy=-16;
+  player.jumping=true;
+ }
+}
+
+// Language
+function toggleLanguage(){
+ language=language==="en"?"ur":"en";
+ document.getElementById("message").textContent=
+ say("English selected","اردو منتخب ہوگئی");
+}
+
+// Game loop
+function update(){
+ if(!running)return;
+
+ frame++;
+ score++;
+
+ drawBackground();
+
+ // Jump physics
+ player.y+=player.vy;
+ player.vy+=0.7;
+
+ if(player.y>=285){
+  player.y=285;
+  player.vy=0;
+  player.jumping=false;
+ }
+
+ // Obstacles
+ if(frame%100===0){
+  obstacles.push({
+   x:820,y:315,w:38,h:35
+  });
+ }
+
+ // Coins
+ if(frame%65===0){
+  gold.push({
+   x:820,y:250,w:25,h:25
+  });
+ }
+
+ // Bananas
+ if(frame%170===0){
+  fruit.push({
+   x:820,y:270,w:30,h:30
+  });
+ }
+
+ obstacles.forEach(o=>o.x-=speed);
+ gold.forEach(c=>c.x-=speed);
+ fruit.forEach(b=>b.x-=speed);
+
+ obstacles=obstacles.filter(o=>o.x>-50);
+ gold=gold.filter(c=>c.x>-40);
+ fruit=fruit.filter(b=>b.x>-40);
+
+ // Hit obstacle
+ for(let o of obstacles){
+  if(collision(player,o)){
+   endGame();
+   return;
+  }
+ }
+
+ // Collect coins
+ gold=gold.filter(c=>{
+  if(collision(player,c)){
+   coins++;
+   return false;
+  }
+  return true;
+ });
+
+ // Collect bananas
+ fruit=fruit.filter(b=>{
+  if(collision(player,b)){
+   bananas++;
+   score+=50;
+   return false;
+  }
+  return true;
+ });
+
+ drawObjects();
+ drawPlayer();
+
+ document.getElementById("score").textContent=
+ say("Score: ","اسکور: ")+score;
+
+ document.getElementById("coins").textContent=
+ say("Coins: ","سکے: ")+coins;
+
+ document.getElementById("bananas").textContent=
+ say("Bananas: ","کیلے: ")+bananas;
+
+ if(frame%500===0)speed+=0.5;
+
+ animationId=requestAnimationFrame(update);
+}
+
+// Game over
+function endGame(){
+ running=false;
+
+ document.getElementById("message").textContent=
+ say(
+  "GAME OVER! Score: "+score+" | Press PLAY",
+  "گیم ختم! اسکور: "+score+" | دوبارہ کھیلیں"
+ );
+}
+
+// Keyboard
+document.addEventListener("keydown",e=>{
+ if(e.code==="Space"||e.code==="ArrowUp"){
+  e.preventDefault();
+  jump();
+ }
+});
+
+// Touch
+canvas.addEventListener("pointerdown",jump);
+
+// Initial screen
+drawBackground();
+drawPlayer();
+
+// Offline support
+if("serviceWorker" in navigator){
+ window.addEventListener("load",()=>{
+  navigator.serviceWorker.register("./service-worker.js")
+  .catch(error=>console.log(error));
+ });
+}
+</script>
+
+</body>
+</html>
