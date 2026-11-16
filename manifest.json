@@ -1,12 +1,25 @@
 
 {
-  "name": "Super Runner Game",
-  "short_name": "SuperRunner",
-  "description": "An exciting 2D endless runner game",
+  "name": "Super Monkey Runner",
+  "short_name": "Monkey Runner",
+  "description": "Fun monkey running adventure game",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "orientation": "landscape",
-  "background_color": "#101b35",
-  "theme_color": "#101b35",
-  "icons": []
+  "background_color": "#168bd2",
+  "theme_color": "#168bd2",
+  "categories": ["games"],
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
