@@ -3,388 +3,159 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#101b35">
-<link rel="manifest" href="./manifest.json">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Super Monkey Runner</title>
-
+<meta name="theme-color" content="#101b35">
+<link rel="manifest" href="manifest.json">
 <style>
 *{box-sizing:border-box}
 body{
  margin:0;background:#101b35;color:white;
- font-family:Arial;text-align:center;
+ font-family:Arial,sans-serif;text-align:center;
 }
-h1{color:#ffd43b;margin:12px}
-#info{font-size:19px;margin:12px}
+h1{margin:12px 0;color:#ffd43b}
+#info{
+ display:flex;justify-content:center;gap:12px;
+ flex-wrap:wrap;padding:8px;font-weight:bold;
+}
+#gameBox{position:relative;width:100%;max-width:850px;margin:auto}
 canvas{
- display:block;width:96%;max-width:800px;
- height:auto;margin:12px auto;
- border:3px solid white;border-radius:14px;
- background:#80d9ff;touch-action:manipulation;
+ width:100%;display:block;background:#8edcff;
+ border:3px solid white;border-radius:10px;
+ touch-action:manipulation;
 }
+#panel{
+ position:absolute;inset:0;display:flex;
+ align-items:center;justify-content:center;
+ background:#0009;padding:15px;
+}
+#message{
+ background:#15284a;padding:22px;
+ border:3px solid #ffd43b;border-radius:16px;
+ max-width:90%;width:380px;
+}
+#message h2{color:#ffd43b;margin:5px}
 button{
- padding:13px 16px;margin:5px;
- border:0;border-radius:12px;
- background:#ffbd24;color:#222;
- font-size:16px;font-weight:bold;
+ background:#ffd43b;color:#17213a;
+ border:0;border-radius:10px;padding:13px 22px;
+ font-size:18px;font-weight:bold;margin:8px;
 }
-#message{min-height:35px}
+#hint{padding:10px;color:#ddd}
 </style>
 </head>
-
 <body>
 
 <h1>🐵 SUPER MONKEY RUNNER</h1>
 
 <div id="info">
- <span id="score">Score: 0</span> |
- <span id="coins">Coins: 0</span> |
- <span id="bananas">Bananas: 0</span>
+ <span id="level">Level: 1</span>
+ <span id="difficulty">Normal</span>
+ <span id="score">Score: 0</span>
+ <span id="coins">Coins: 0</span>
 </div>
 
+<div id="gameBox">
 <canvas id="game" width="800" height="400"></canvas>
 
-<div>
- <button onclick="startGame()">▶ PLAY</button>
- <button onclick="jump()">⬆ JUMP</button>
- <button onclick="toggleLanguage()">🌐 اردو / English</button>
+<div id="panel">
+ <div id="message">
+  <h2>🐵 Super Monkey Runner</h2>
+  <p>200 Levels Challenge!</p>
+  <p>Jump karo, coins aur bananas collect karo!</p>
+  <button onclick="startGame()">PLAY GAME</button>
+ </div>
+</div>
 </div>
 
-<p id="message">Tap PLAY to start!</p>
+<div id="hint">
+Mobile: Screen par tap karke jump karein.<br>
+Computer: Space ya Up Arrow dabayein.
+</div>
 
 <script>
 const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 
-let running=false;
-let score=0,coins=0,bananas=0;
-let frame=0,speed=5;
-let obstacles=[],gold=[],fruit=[];
-let language="en";
-let animationId=0;
+const panel=document.getElementById("panel");
+const message=document.getElementById("message");
 
-const player={
- x:100,y:285,w:44,h:65,
- vy:0,jumping:false
+const levelText=document.getElementById("level");
+const difficultyText=document.getElementById("difficulty");
+const scoreText=document.getElementById("score");
+const coinsText=document.getElementById("coins");
+
+let level=1;
+let score=0;
+let coins=0;
+let distance=0;
+let running=false;
+let gameOver=false;
+let completed=false;
+
+let speed=5;
+let frame=0;
+let obstacles=[];
+let treasures=[];
+
+let bestLevel=Number(localStorage.getItem("monkeyBestLevel")||1);
+
+const monkey={
+ x:100,y:280,w:55,h:65,
+ vy:0,ground:280,jumping:false
 };
 
-function say(en,ur){
- return language==="en"?en:ur;
+function difficultyName(){
+ if(level<=50)return "NORMAL";
+ if(level<=100)return "MEDIUM";
+ if(level<=150)return "HARD";
+ return "VERY HARD";
 }
 
-// Background
-function drawBackground(){
- ctx.fillStyle="#80d9ff";
- ctx.fillRect(0,0,800,400);
-
- // Sun
- ctx.fillStyle="#fff17a";
- ctx.beginPath();
- ctx.arc(680,65,35,0,Math.PI*2);
- ctx.fill();
-
- // Clouds
- ctx.fillStyle="white";
- [120,350,550].forEach(x=>{
-  ctx.beginPath();
-  ctx.arc(x,90,20,0,Math.PI*2);
-  ctx.arc(x+25,85,27,0,Math.PI*2);
-  ctx.arc(x+50,95,18,0,Math.PI*2);
-  ctx.fill();
- });
-
- // Hills
- ctx.fillStyle="#43ae52";
- ctx.beginPath();
- ctx.arc(100,350,110,Math.PI,0);
- ctx.arc(350,350,140,Math.PI,0);
- ctx.arc(650,350,120,Math.PI,0);
- ctx.fill();
-
- // Trees
- [60,470,730].forEach(x=>{
-  ctx.fillStyle="#70421f";
-  ctx.fillRect(x,270,15,80);
-  ctx.fillStyle="#168b45";
-  ctx.beginPath();
-  ctx.arc(x+8,260,30,0,Math.PI*2);
-  ctx.fill();
- });
-
- // Road
- ctx.fillStyle="#444";
- ctx.fillRect(0,350,800,50);
- ctx.fillStyle="white";
-
- for(let i=0;i<9;i++){
-  let x=i*110-frame*speed%110;
-  ctx.fillRect(x,372,50,5);
- }
+function updateInfo(){
+ levelText.textContent="Level: "+level+"/200";
+ difficultyText.textContent=difficultyName();
+ scoreText.textContent="Score: "+score;
+ coinsText.textContent="Coins: "+coins;
 }
 
-// Monkey character
-function drawPlayer(){
-
- let bounce=running && !player.jumping ?
- Math.sin(frame*0.35)*3 : 0;
-
- let x=player.x;
- let y=player.y+bounce;
-
- // Tail
- ctx.strokeStyle="#8b4513";
- ctx.lineWidth=6;
- ctx.beginPath();
- ctx.moveTo(x+35,y+42);
- ctx.quadraticCurveTo(x+65,y+20,x+48,y+7);
- ctx.stroke();
-
- // Ears
- ctx.fillStyle="#8b4513";
- ctx.beginPath();
- ctx.arc(x+5,y+9,11,0,Math.PI*2);
- ctx.arc(x+39,y+9,11,0,Math.PI*2);
- ctx.fill();
-
- // Face
- ctx.fillStyle="#a0522d";
- ctx.beginPath();
- ctx.arc(x+22,y+15,21,0,Math.PI*2);
- ctx.fill();
-
- // Face center
- ctx.fillStyle="#ffd39b";
- ctx.beginPath();
- ctx.ellipse(x+22,y+22,14,10,0,0,Math.PI*2);
- ctx.fill();
-
- // Eyes
- ctx.fillStyle="white";
- ctx.beginPath();
- ctx.arc(x+15,y+12,5,0,Math.PI*2);
- ctx.arc(x+29,y+12,5,0,Math.PI*2);
- ctx.fill();
-
- ctx.fillStyle="black";
- ctx.fillRect(x+16,y+11,3,4);
- ctx.fillRect(x+30,y+11,3,4);
-
- // Smile
- ctx.strokeStyle="#54220c";
- ctx.lineWidth=2;
- ctx.beginPath();
- ctx.arc(x+22,y+22,6,0,Math.PI);
- ctx.stroke();
-
- // Body
- ctx.fillStyle="#8b4513";
- ctx.fillRect(x+8,y+35,28,23);
-
- // Arms
- let arm=Math.sin(frame*.35)*5;
- ctx.fillStyle="#8b4513";
- ctx.fillRect(x,y+36+arm,10,7);
- ctx.fillRect(x+35,y+36-arm,10,7);
-
- // Animated legs
- ctx.fillStyle="#5b2d13";
-
- let legMove=running&&!player.jumping?
- Math.sin(frame*.35)*8:0;
-
- ctx.save();
- ctx.translate(x+14,y+53);
- ctx.rotate(legMove*Math.PI/180);
- ctx.fillRect(-6,0,12,9);
- ctx.restore();
-
- ctx.save();
- ctx.translate(x+31,y+53);
- ctx.rotate(-legMove*Math.PI/180);
- ctx.fillRect(-6,0,12,9);
- ctx.restore();
+function levelTarget(){
+ return 700 + level*15;
 }
 
-// Objects
-function drawObjects(){
-
- obstacles.forEach(o=>{
-  ctx.fillStyle="#995020";
-  ctx.fillRect(o.x,o.y,o.w,o.h);
-  ctx.fillStyle="#d9822b";
-  ctx.fillRect(o.x+5,o.y+7,o.w-10,8);
- });
-
- gold.forEach(c=>{
-  ctx.fillStyle="#ffca28";
-  ctx.beginPath();
-  ctx.arc(c.x,c.y,12,0,Math.PI*2);
-  ctx.fill();
-  ctx.fillStyle="#fff";
-  ctx.font="bold 14px Arial";
-  ctx.fillText("$",c.x-5,c.y+5);
- });
-
- fruit.forEach(b=>{
-  // Banana
-  ctx.font="28px Arial";
-  ctx.fillText("🍌",b.x-14,b.y+10);
- });
+function gameSpeed(){
+ if(level<=50)return 5 + level*.025;
+ if(level<=100)return 6.25 + (level-50)*.045;
+ if(level<=150)return 8.5 + (level-100)*.065;
+ return 12 + (level-150)*.09;
 }
 
-// Collision
-function collision(a,b){
- return a.x < b.x+b.w &&
- a.x+a.w > b.x &&
- a.y < b.y+b.h &&
- a.y+a.h > b.y;
-}
-
-// Start game
 function startGame(){
- cancelAnimationFrame(animationId);
-
  score=0;
- coins=0;
- bananas=0;
+ distance=0;
  frame=0;
- speed=5;
-
  obstacles=[];
- gold=[];
- fruit=[];
-
- player.y=285;
- player.vy=0;
- player.jumping=false;
-
+ treasures=[];
+ speed=gameSpeed();
+ monkey.y=monkey.ground;
+ monkey.vy=0;
+ monkey.jumping=false;
  running=true;
-
- document.getElementById("message").textContent=
- say("Collect coins and bananas!","سکے اور کیلے جمع کریں!");
-
- update();
+ gameOver=false;
+ completed=false;
+ panel.style.display="none";
+ updateInfo();
 }
 
-// Jump
 function jump(){
- if(running&&!player.jumping){
-  player.vy=-16;
-  player.jumping=true;
- }
-}
-
-// Language
-function toggleLanguage(){
- language=language==="en"?"ur":"en";
- document.getElementById("message").textContent=
- say("English selected","اردو منتخب ہوگئی");
-}
-
-// Game loop
-function update(){
  if(!running)return;
-
- frame++;
- score++;
-
- drawBackground();
-
- // Jump physics
- player.y+=player.vy;
- player.vy+=0.7;
-
- if(player.y>=285){
-  player.y=285;
-  player.vy=0;
-  player.jumping=false;
+ if(!monkey.jumping){
+  monkey.vy=-14;
+  monkey.jumping=true;
  }
-
- // Obstacles
- if(frame%100===0){
-  obstacles.push({
-   x:820,y:315,w:38,h:35
-  });
- }
-
- // Coins
- if(frame%65===0){
-  gold.push({
-   x:820,y:250,w:25,h:25
-  });
- }
-
- // Bananas
- if(frame%170===0){
-  fruit.push({
-   x:820,y:270,w:30,h:30
-  });
- }
-
- obstacles.forEach(o=>o.x-=speed);
- gold.forEach(c=>c.x-=speed);
- fruit.forEach(b=>b.x-=speed);
-
- obstacles=obstacles.filter(o=>o.x>-50);
- gold=gold.filter(c=>c.x>-40);
- fruit=fruit.filter(b=>b.x>-40);
-
- // Hit obstacle
- for(let o of obstacles){
-  if(collision(player,o)){
-   endGame();
-   return;
-  }
- }
-
- // Collect coins
- gold=gold.filter(c=>{
-  if(collision(player,c)){
-   coins++;
-   return false;
-  }
-  return true;
- });
-
- // Collect bananas
- fruit=fruit.filter(b=>{
-  if(collision(player,b)){
-   bananas++;
-   score+=50;
-   return false;
-  }
-  return true;
- });
-
- drawObjects();
- drawPlayer();
-
- document.getElementById("score").textContent=
- say("Score: ","اسکور: ")+score;
-
- document.getElementById("coins").textContent=
- say("Coins: ","سکے: ")+coins;
-
- document.getElementById("bananas").textContent=
- say("Bananas: ","کیلے: ")+bananas;
-
- if(frame%500===0)speed+=0.5;
-
- animationId=requestAnimationFrame(update);
 }
 
-// Game over
-function endGame(){
- running=false;
+canvas.addEventListener("pointerdown",jump);
 
- document.getElementById("message").textContent=
- say(
-  "GAME OVER! Score: "+score+" | Press PLAY",
-  "گیم ختم! اسکور: "+score+" | دوبارہ کھیلیں"
- );
-}
-
-// Keyboard
 document.addEventListener("keydown",e=>{
  if(e.code==="Space"||e.code==="ArrowUp"){
   e.preventDefault();
@@ -392,21 +163,339 @@ document.addEventListener("keydown",e=>{
  }
 });
 
-// Touch
-canvas.addEventListener("pointerdown",jump);
+function drawBackground(){
+ let sky=ctx.createLinearGradient(0,0,0,400);
+ sky.addColorStop(0,"#63c9ff");
+ sky.addColorStop(1,"#d5f7ff");
+ ctx.fillStyle=sky;
+ ctx.fillRect(0,0,800,400);
 
-// Initial screen
-drawBackground();
-drawPlayer();
+ // Sun
+ ctx.fillStyle="#ffdf55";
+ ctx.beginPath();
+ ctx.arc(690,65,35,0,Math.PI*2);
+ ctx.fill();
 
-// Offline support
+ // Clouds
+ ctx.fillStyle="white";
+ for(let i=0;i<4;i++){
+  let x=(i*230-frame*.3)%950;
+  if(x<-100)x+=950;
+  ctx.beginPath();
+  ctx.arc(x,85,22,0,Math.PI*2);
+  ctx.arc(x+25,75,28,0,Math.PI*2);
+  ctx.arc(x+55,87,20,0,Math.PI*2);
+  ctx.fill();
+ }
+
+ // Hills
+ ctx.fillStyle="#60bd62";
+ ctx.beginPath();
+ ctx.moveTo(0,280);
+ for(let x=0;x<=800;x+=100){
+  ctx.quadraticCurveTo(x+50,210,x+100,280);
+ }
+ ctx.lineTo(800,400);
+ ctx.lineTo(0,400);
+ ctx.fill();
+
+ // Ground
+ ctx.fillStyle="#348a3c";
+ ctx.fillRect(0,345,800,55);
+ ctx.fillStyle="#e7c47b";
+ ctx.fillRect(0,360,800,40);
+
+ // Road marks
+ ctx.fillStyle="white";
+ for(let i=0;i<10;i++){
+  let x=(i*110-frame*speed)%900;
+  if(x<0)x+=900;
+  ctx.fillRect(x,380,45,5);
+ }
+}
+
+function drawMonkey(){
+ let x=monkey.x;
+ let y=monkey.y;
+
+ ctx.save();
+
+ // Tail
+ ctx.strokeStyle="#793d18";
+ ctx.lineWidth=9;
+ ctx.lineCap="round";
+ ctx.beginPath();
+ ctx.moveTo(x+12,y+37);
+ ctx.quadraticCurveTo(x-28,y+5,x-17,y+25);
+ ctx.stroke();
+
+ // Body
+ ctx.fillStyle="#a65a25";
+ ctx.beginPath();
+ ctx.ellipse(x+27,y+42,20,25,0,0,Math.PI*2);
+ ctx.fill();
+
+ // Belly
+ ctx.fillStyle="#f3c58a";
+ ctx.beginPath();
+ ctx.ellipse(x+28,y+45,12,17,0,0,Math.PI*2);
+ ctx.fill();
+
+ // Ears
+ ctx.fillStyle="#793d18";
+ ctx.beginPath();
+ ctx.arc(x+5,y+10,11,0,Math.PI*2);
+ ctx.arc(x+49,y+10,11,0,Math.PI*2);
+ ctx.fill();
+
+ // Head
+ ctx.fillStyle="#a65a25";
+ ctx.beginPath();
+ ctx.arc(x+27,y+15,25,0,Math.PI*2);
+ ctx.fill();
+
+ // Face
+ ctx.fillStyle="#f3c58a";
+ ctx.beginPath();
+ ctx.ellipse(x+27,y+22,17,12,0,0,Math.PI*2);
+ ctx.fill();
+
+ // Eyes
+ ctx.fillStyle="white";
+ ctx.beginPath();
+ ctx.arc(x+18,y+12,5,0,Math.PI*2);
+ ctx.arc(x+36,y+12,5,0,Math.PI*2);
+ ctx.fill();
+
+ ctx.fillStyle="black";
+ ctx.beginPath();
+ ctx.arc(x+19,y+12,2,0,Math.PI*2);
+ ctx.arc(x+37,y+12,2,0,Math.PI*2);
+ ctx.fill();
+
+ // Nose and smile
+ ctx.fillStyle="#5a2815";
+ ctx.beginPath();
+ ctx.arc(x+27,y+21,3,0,Math.PI*2);
+ ctx.fill();
+
+ ctx.strokeStyle="#5a2815";
+ ctx.lineWidth=2;
+ ctx.beginPath();
+ ctx.arc(x+27,y+22,8,.2,2.9);
+ ctx.stroke();
+
+ // Arms
+ ctx.strokeStyle="#793d18";
+ ctx.lineWidth=8;
+ ctx.beginPath();
+ ctx.moveTo(x+12,y+37);
+ ctx.lineTo(x-1,y+49);
+ ctx.moveTo(x+43,y+37);
+ ctx.lineTo(x+55,y+48);
+ ctx.stroke();
+
+ // Legs
+ let swing=Math.sin(frame*.3)*7;
+ ctx.strokeStyle="#793d18";
+ ctx.lineWidth=9;
+ ctx.beginPath();
+ ctx.moveTo(x+18,y+60);
+ ctx.lineTo(x+13+swing,y+72);
+ ctx.moveTo(x+37,y+60);
+ ctx.lineTo(x+42-swing,y+72);
+ ctx.stroke();
+
+ ctx.restore();
+}
+
+function spawnItems(){
+ if(frame%90===0){
+  obstacles.push({
+   x:820,y:320,w:38,h:40
+  });
+ }
+
+ if(frame%55===0){
+  treasures.push({
+   x:820,
+   y:230+Math.random()*80,
+   type:Math.random()<.25?"banana":"coin",
+   taken:false
+  });
+ }
+}
+
+function drawItems(){
+ obstacles.forEach(o=>{
+  ctx.fillStyle="#8b4b20";
+  ctx.fillRect(o.x,o.y,o.w,o.h);
+  ctx.strokeStyle="#4e2914";
+  ctx.lineWidth=4;
+  ctx.strokeRect(o.x,o.y,o.w,o.h);
+  ctx.fillStyle="#d69a51";
+  ctx.fillRect(o.x+5,o.y+8,o.w-10,5);
+ });
+
+ treasures.forEach(t=>{
+  if(t.taken)return;
+  if(t.type==="coin"){
+   ctx.fillStyle="#ffd700";
+   ctx.beginPath();
+   ctx.arc(t.x,t.y,12,0,Math.PI*2);
+   ctx.fill();
+   ctx.strokeStyle="#b77b00";
+   ctx.lineWidth=3;
+   ctx.stroke();
+  }else{
+   ctx.font="28px Arial";
+   ctx.fillText("🍌",t.x-14,t.y+10);
+  }
+ });
+}
+
+function collision(a,b){
+ return a.x < b.x+b.w &&
+ a.x+a.w > b.x &&
+ a.y < b.y+b.h &&
+ a.y+a.h > b.y;
+}
+
+function endGame(){
+ running=false;
+ gameOver=true;
+ panel.style.display="flex";
+ message.innerHTML=
+ "<h2>😢 GAME OVER</h2>"+
+ "<p>Level: "+level+"</p>"+
+ "<p>Score: "+score+"</p>"+
+ "<p>Coins: "+coins+"</p>"+
+ "<button onclick='startGame()'>TRY AGAIN</button>";
+}
+
+function completeLevel(){
+ running=false;
+ completed=true;
+
+ if(level>bestLevel){
+  bestLevel=level;
+  localStorage.setItem("monkeyBestLevel",bestLevel);
+ }
+
+ panel.style.display="flex";
+
+ if(level===200){
+  message.innerHTML=
+  "<h2>🏆 YOU ARE THE CHAMPION!</h2>"+
+  "<p>Congratulations!</p>"+
+  "<p>Aapne saare 200 levels complete kar liye!</p>"+
+  "<p>Total Coins: "+coins+"</p>"+
+  "<button onclick='restartAll()'>PLAY AGAIN</button>";
+ }else{
+  message.innerHTML=
+  "<h2>🎉 LEVEL COMPLETE!</h2>"+
+  "<p>Level "+level+" complete ho gaya!</p>"+
+  "<p>Score: "+score+"</p>"+
+  "<p>Coins: "+coins+"</p>"+
+  "<button onclick='nextLevel()'>NEXT LEVEL</button>";
+ }
+}
+
+function nextLevel(){
+ level++;
+ startGame();
+}
+
+function restartAll(){
+ level=1;
+ coins=0;
+ startGame();
+}
+
+function update(){
+ if(!running)return;
+
+ frame++;
+ speed=gameSpeed();
+
+ distance+=speed;
+ score+=1;
+
+ monkey.y+=monkey.vy;
+ monkey.vy+=.7;
+
+ if(monkey.y>=monkey.ground){
+  monkey.y=monkey.ground;
+  monkey.vy=0;
+  monkey.jumping=false;
+ }
+
+ spawnItems();
+
+ obstacles.forEach(o=>{
+  o.x-=speed;
+  if(collision(
+   {x:monkey.x+8,y:monkey.y+10,w:38,h:58},
+   o
+  )){
+   endGame();
+  }
+ });
+
+ treasures.forEach(t=>{
+  t.x-=speed;
+
+  if(!t.taken && collision(
+   {x:monkey.x,y:monkey.y,w:55,h:65},
+   {x:t.x-12,y:t.y-12,w:24,h:24}
+  )){
+   t.taken=true;
+   if(t.type==="coin"){
+    coins++;
+    score+=10;
+   }else{
+    score+=50;
+   }
+  }
+ });
+
+ obstacles=obstacles.filter(o=>o.x>-60);
+ treasures=treasures.filter(t=>t.x>-60&&!t.taken);
+
+ updateInfo();
+
+ if(distance>=levelTarget()){
+  completeLevel();
+ }
+}
+
+function draw(){
+ drawBackground();
+ drawItems();
+ drawMonkey();
+
+ ctx.fillStyle="#17213a";
+ ctx.font="bold 18px Arial";
+ ctx.fillText("Target: "+Math.floor(distance)+
+ " / "+levelTarget(),20,30);
+}
+
+function loop(){
+ update();
+ draw();
+ requestAnimationFrame(loop);
+}
+
+updateInfo();
+draw();
+loop();
+
 if("serviceWorker" in navigator){
  window.addEventListener("load",()=>{
-  navigator.serviceWorker.register("./service-worker.js")
-  .catch(error=>console.log(error));
+  navigator.serviceWorker.register("service-worker.js")
+  .catch(err=>console.log("Service Worker error",err));
  });
 }
 </script>
-
 </body>
 </html>
