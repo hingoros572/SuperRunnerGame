@@ -1,12 +1,14 @@
 
-const CACHE_NAME = "super-runner-v2";
+const CACHE_NAME = "super-runner-v3";
 
 const ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
   "./monkey.png",
-  "./monkey-run.png"
+  "./monkey-run.png",
+  "./icon-192.png",
+  "./icon-512.png"
 ];
 
 self.addEventListener("install", event => {
@@ -32,9 +34,7 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
 
-  const isPage = event.request.mode === "navigate";
-
-  if (isPage) {
+  if (event.request.mode === "navigate") {
     event.respondWith(
       fetch(event.request)
         .then(response => {
