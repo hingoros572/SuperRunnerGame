@@ -3,98 +3,96 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Super Monkey Runner 200</title>
-<meta name="theme-color" content="#101b35">
-<link rel="manifest" href="manifest.json">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Super Monkey Runner</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#101b35;color:white;font-family:Arial;text-align:center}
-h1{color:#ffd43b;margin:12px 0}
-#info{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;padding:10px;font-weight:bold}
-#gameBox{position:relative;width:100%;max-width:850px;margin:auto}
-canvas{width:100%;display:block;border:3px solid white;border-radius:10px;touch-action:manipulation}
-#panel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#0009;padding:15px}
-#message{background:#15284a;padding:20px;border:3px solid #ffd43b;border-radius:16px;width:380px;max-width:95%}
-#message h2{color:#ffd43b}
-button{background:#ffd43b;color:#17213a;border:0;border-radius:10px;padding:13px 22px;font-size:18px;font-weight:bold;margin:8px}
-#hint{padding:12px;color:#ddd}
-#progress{height:9px;background:#38445c;max-width:850px;margin:5px auto;border-radius:10px;overflow:hidden}
-#bar{height:100%;width:0;background:#ffd43b}
+body{
+ margin:0;background:#101b36;color:white;
+ font-family:Arial,sans-serif;text-align:center;
+ overflow:hidden;touch-action:manipulation
+}
+h1{font-size:25px;margin:10px 0;color:#ffd43b}
+#info{
+ display:flex;justify-content:space-around;align-items:center;
+ flex-wrap:wrap;gap:7px;padding:8px;font-size:14px;font-weight:bold
+}
+.stat{background:#26385f;border-radius:10px;padding:8px 10px}
+#game{
+ display:block;width:100%;max-width:950px;height:auto;
+ margin:5px auto;background:#83dafa;border:3px solid white;
+ border-radius:12px;touch-action:none
+}
+#controls{padding:7px}
+button{
+ border:0;border-radius:12px;padding:12px 22px;
+ font-size:17px;font-weight:bold;margin:4px;
+ background:#ffca28;color:#222
+}
+#jump{background:#24d46b;color:#071b10}
+#message{font-size:15px;min-height:22px;color:#ffe082}
+#bar{height:10px;background:#34466e;margin:5px 12px;border-radius:10px;overflow:hidden}
+#progress{height:100%;width:0%;background:#31df75}
+.small{font-size:12px;color:#d8e4ff}
 </style>
 </head>
 <body>
 
-<h1>🐵 SUPER MONKEY RUNNER</h1>
+<h1>🐵 SUPER MONKEY RUNNER 🐵</h1>
 
 <div id="info">
- <span id="level">Level: 1/200</span>
- <span id="difficulty">NORMAL</span>
- <span id="timer">Time: 04:00</span>
- <span id="score">Score: 0</span>
- <span id="coins">Coins: 0</span>
- <span id="lives">❤️❤️❤️</span>
+ <div class="stat" id="level">Level: 1 / 200</div>
+ <div class="stat" id="time">Time: 04:00</div>
+ <div class="stat" id="lives">❤️❤️❤️</div>
+ <div class="stat" id="score">Score: 0</div>
+ <div class="stat" id="coins">🪙 0</div>
 </div>
 
-<div id="progress"><div id="bar"></div></div>
+<div id="bar"><div id="progress"></div></div>
 
-<div id="gameBox">
-<canvas id="game" width="800" height="400"></canvas>
-<div id="panel">
- <div id="message">
-  <h2>🐵 Super Monkey Runner</h2>
-  <p>200 Levels Challenge!</p>
-  <p>❤️ 3 Lives System</p>
-  <p>Har level ka apna time limit!</p>
-  <button onclick="startGame()">PLAY GAME</button>
- </div>
-</div>
-</div>
+<canvas id="game" width="900" height="500"></canvas>
 
-<div id="hint">
-Mobile: Screen par tap karke jump karein.<br>
-Computer: Space ya Up Arrow dabayein.
+<div id="message">Play dabayein aur bandar ko daudayein!</div>
+
+<div id="controls">
+ <button id="start">▶ PLAY</button>
+ <button id="jump">⬆ JUMP</button>
+ <button id="pause">⏸ PAUSE</button>
+ <button id="restart">↻ RESTART</button>
 </div>
+<div class="small">Mobile: Screen ya JUMP button dabakar jump karein</div>
 
 <script>
 const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 
-const panel=document.getElementById("panel");
-const message=document.getElementById("message");
-
 const levelText=document.getElementById("level");
-const difficultyText=document.getElementById("difficulty");
-const timerText=document.getElementById("timer");
+const timeText=document.getElementById("time");
+const livesText=document.getElementById("lives");
 const scoreText=document.getElementById("score");
 const coinsText=document.getElementById("coins");
-const livesText=document.getElementById("lives");
-const bar=document.getElementById("bar");
+const message=document.getElementById("message");
+const progress=document.getElementById("progress");
 
-let level=1;
-let score=0;
-let coins=0;
-let lives=3;
-let running=false;
-let frame=0;
+const monkeyImage=new Image();
+monkeyImage.src="monkey.png";
+let monkeyLoaded=false;
+monkeyImage.onload=()=>{monkeyLoaded=true;};
+monkeyImage.onerror=()=>{monkeyLoaded=false;};
+
+let level=1,score=0,coins=0,lives=3;
+let running=false,paused=false,gameOver=false;
+let levelStart=0,levelDuration=240000;
+let lastFrame=0,spawnTimer=0,collectTimer=0;
+let obstacles=[],treasures=[];
+let ground=410;
 let speed=5;
 let invulnerable=0;
-let levelStartTime=0;
-let levelDuration=240000;
-let obstacles=[];
-let treasures=[];
 
-const monkey={
- x:100,y:280,w:55,h:65,
- vy:0,ground:280,jumping:false
+const player={
+ x:110,y:300,w:95,h:100,
+ vy:0,onGround:false
 };
-
-function difficultyName(){
- if(level<=50)return "NORMAL";
- if(level<=100)return "MEDIUM";
- if(level<=150)return "HARD";
- return "VERY HARD";
-}
 
 function getLevelDuration(){
  if(level<=50)return 4*60*1000;
@@ -105,415 +103,352 @@ function getLevelDuration(){
 
 function formatTime(ms){
  let seconds=Math.max(0,Math.ceil(ms/1000));
- let minutes=Math.floor(seconds/60);
- let remaining=seconds%60;
- return String(minutes).padStart(2,"0")+":"+
- String(remaining).padStart(2,"0");
+ let min=Math.floor(seconds/60);
+ let sec=seconds%60;
+ return String(min).padStart(2,"0")+":"+String(sec).padStart(2,"0");
 }
 
-function gameSpeed(){
- if(level<=50)return 5+level*.025;
- if(level<=100)return 6.25+(level-50)*.045;
- if(level<=150)return 8.5+(level-100)*.065;
- return 12+(level-150)*.09;
+function difficulty(){
+ if(level<=50)return "NORMAL";
+ if(level<=100)return "MEDIUM";
+ if(level<=150)return "HARD";
+ return "VERY HARD";
 }
 
 function updateInfo(){
- levelText.textContent="Level: "+level+"/200";
- difficultyText.textContent=difficultyName();
- scoreText.textContent="Score: "+score;
- coinsText.textContent="Coins: "+coins;
+ levelText.textContent="Level: "+level+" / 200 ("+difficulty()+")";
  livesText.textContent="❤️".repeat(lives)+"🖤".repeat(3-lives);
+ scoreText.textContent="Score: "+score;
+ coinsText.textContent="🪙 "+coins;
 }
-
-function startGame(){
- score=0;
- frame=0;
- obstacles=[];
- treasures=[];
- lives=3;
- invulnerable=0;
-
- speed=gameSpeed();
- levelDuration=getLevelDuration();
- levelStartTime=performance.now();
-
- monkey.y=monkey.ground;
- monkey.vy=0;
- monkey.jumping=false;
-
- running=true;
- panel.style.display="none";
- updateInfo();
-}
-
-function jump(){
- if(!running)return;
- if(!monkey.jumping){
-  monkey.vy=-14;
-  monkey.jumping=true;
- }
-}
-
-canvas.addEventListener("pointerdown",jump);
-
-document.addEventListener("keydown",e=>{
- if(e.code==="Space"||e.code==="ArrowUp"){
-  e.preventDefault();
-  jump();
- }
-});
 
 function drawBackground(){
- let sky=ctx.createLinearGradient(0,0,0,400);
- sky.addColorStop(0,"#63c9ff");
- sky.addColorStop(1,"#d5f7ff");
+ let sky=ctx.createLinearGradient(0,0,0,500);
+ sky.addColorStop(0,"#65c9f4");
+ sky.addColorStop(1,"#d5f5ff");
  ctx.fillStyle=sky;
- ctx.fillRect(0,0,800,400);
+ ctx.fillRect(0,0,900,500);
 
- ctx.fillStyle="#ffdf55";
- ctx.beginPath();
- ctx.arc(690,65,35,0,Math.PI*2);
- ctx.fill();
+ // Sun
+ ctx.fillStyle="#ffe34d";
+ ctx.beginPath();ctx.arc(770,75,43,0,Math.PI*2);ctx.fill();
 
+ // Clouds
  ctx.fillStyle="white";
- for(let i=0;i<4;i++){
-  let x=(i*230-frame*.3)%950;
-  if(x<-100)x+=950;
-  ctx.beginPath();
-  ctx.arc(x,85,22,0,Math.PI*2);
-  ctx.arc(x+25,75,28,0,Math.PI*2);
-  ctx.arc(x+55,87,20,0,Math.PI*2);
-  ctx.fill();
- }
+ drawCloud(130,90);drawCloud(420,65);drawCloud(650,155);
 
- ctx.fillStyle="#60bd62";
+ // Hills
+ ctx.fillStyle="#66c66c";
  ctx.beginPath();
- ctx.moveTo(0,280);
- for(let x=0;x<=800;x+=100){
-  ctx.quadraticCurveTo(x+50,210,x+100,280);
+ ctx.moveTo(0,350);ctx.quadraticCurveTo(180,210,350,350);
+ ctx.quadraticCurveTo(550,230,730,350);
+ ctx.quadraticCurveTo(830,280,900,340);
+ ctx.lineTo(900,500);ctx.lineTo(0,500);ctx.fill();
+
+ // Ground
+ ctx.fillStyle="#9a6034";
+ ctx.fillRect(0,ground,900,90);
+ ctx.fillStyle="#39b84a";
+ ctx.fillRect(0,ground,900,13);
+ ctx.fillStyle="#d5a05b";
+ for(let i=0;i<900;i+=65){
+  ctx.fillRect((i-(score*2)%65),ground+35,30,5);
  }
- ctx.lineTo(800,400);
- ctx.lineTo(0,400);
+}
+
+function drawCloud(x,y){
+ ctx.beginPath();
+ ctx.arc(x,y,23,0,Math.PI*2);
+ ctx.arc(x+25,y-12,28,0,Math.PI*2);
+ ctx.arc(x+53,y,22,0,Math.PI*2);
  ctx.fill();
-
- ctx.fillStyle="#348a3c";
- ctx.fillRect(0,345,800,55);
- ctx.fillStyle="#e7c47b";
- ctx.fillRect(0,360,800,40);
-
- ctx.fillStyle="white";
- for(let i=0;i<10;i++){
-  let x=(i*110-frame*speed)%900;
-  if(x<0)x+=900;
-  ctx.fillRect(x,380,45,5);
- }
 }
 
 function drawMonkey(){
- let x=monkey.x,y=monkey.y;
- ctx.save();
+ if(invulnerable>0 && Math.floor(invulnerable/7)%2===0)return;
 
- if(invulnerable>0&&Math.floor(frame/5)%2===0){
-  ctx.globalAlpha=.35;
- }
-
- // Tail
- ctx.strokeStyle="#793d18";
- ctx.lineWidth=9;
- ctx.lineCap="round";
- ctx.beginPath();
- ctx.moveTo(x+12,y+37);
- ctx.quadraticCurveTo(x-28,y+5,x-17,y+25);
- ctx.stroke();
-
- // Body
- ctx.fillStyle="#a65a25";
- ctx.beginPath();
- ctx.ellipse(x+27,y+42,20,25,0,0,Math.PI*2);
- ctx.fill();
-
- // Belly
- ctx.fillStyle="#f3c58a";
- ctx.beginPath();
- ctx.ellipse(x+28,y+45,12,17,0,0,Math.PI*2);
- ctx.fill();
-
- // Ears
- ctx.fillStyle="#793d18";
- ctx.beginPath();
- ctx.arc(x+5,y+10,11,0,Math.PI*2);
- ctx.arc(x+49,y+10,11,0,Math.PI*2);
- ctx.fill();
-
- // Head
- ctx.fillStyle="#a65a25";
- ctx.beginPath();
- ctx.arc(x+27,y+15,25,0,Math.PI*2);
- ctx.fill();
-
- // Face
- ctx.fillStyle="#f3c58a";
- ctx.beginPath();
- ctx.ellipse(x+27,y+22,17,12,0,0,Math.PI*2);
- ctx.fill();
-
- // Eyes
- ctx.fillStyle="white";
- ctx.beginPath();
- ctx.arc(x+18,y+12,5,0,Math.PI*2);
- ctx.arc(x+36,y+12,5,0,Math.PI*2);
- ctx.fill();
-
- ctx.fillStyle="black";
- ctx.beginPath();
- ctx.arc(x+19,y+12,2,0,Math.PI*2);
- ctx.arc(x+37,y+12,2,0,Math.PI*2);
- ctx.fill();
-
- // Nose
- ctx.fillStyle="#5a2815";
- ctx.beginPath();
- ctx.arc(x+27,y+21,3,0,Math.PI*2);
- ctx.fill();
-
- // Smile
- ctx.strokeStyle="#5a2815";
- ctx.lineWidth=2;
- ctx.beginPath();
- ctx.arc(x+27,y+22,8,.2,2.9);
- ctx.stroke();
-
- // Arms
- ctx.strokeStyle="#793d18";
- ctx.lineWidth=8;
- ctx.beginPath();
- ctx.moveTo(x+12,y+37);
- ctx.lineTo(x-1,y+49);
- ctx.moveTo(x+43,y+37);
- ctx.lineTo(x+55,y+48);
- ctx.stroke();
-
- // Running legs
- let swing=Math.sin(frame*.3)*7;
- ctx.strokeStyle="#793d18";
- ctx.lineWidth=9;
- ctx.beginPath();
- ctx.moveTo(x+18,y+60);
- ctx.lineTo(x+13+swing,y+72);
- ctx.moveTo(x+37,y+60);
- ctx.lineTo(x+42-swing,y+72);
- ctx.stroke();
-
- ctx.restore();
-}
-
-function spawnItems(){
- let obstacleGap=level>150?65:level>100?75:level>50?85:100;
- let treasureGap=65;
-
- if(frame%obstacleGap===0){
-  obstacles.push({x:820,y:320,w:38,h:40});
- }
-
- if(frame%treasureGap===0){
-  treasures.push({
-   x:820,
-   y:220+Math.random()*90,
-   type:Math.random()<.25?"banana":"coin",
-   taken:false
-  });
- }
-}
-
-function drawItems(){
- obstacles.forEach(o=>{
-  ctx.fillStyle="#8b4b20";
-  ctx.fillRect(o.x,o.y,o.w,o.h);
-  ctx.strokeStyle="#4e2914";
-  ctx.lineWidth=4;
-  ctx.strokeRect(o.x,o.y,o.w,o.h);
-  ctx.fillStyle="#d69a51";
-  ctx.fillRect(o.x+5,o.y+8,o.w-10,5);
- });
-
- treasures.forEach(t=>{
-  if(t.taken)return;
-  if(t.type==="coin"){
-   ctx.fillStyle="#ffd700";
-   ctx.beginPath();
-   ctx.arc(t.x,t.y,12,0,Math.PI*2);
-   ctx.fill();
-   ctx.strokeStyle="#b77b00";
-   ctx.lineWidth=3;
-   ctx.stroke();
-  }else{
-   ctx.font="28px Arial";
-   ctx.fillText("🍌",t.x-14,t.y+10);
-  }
- });
-}
-
-function collision(a,b){
- return a.x<b.x+b.w &&
- a.x+a.w>b.x &&
- a.y<b.y+b.h &&
- a.y+a.h>b.y;
-}
-
-function loseLife(){
- if(invulnerable>0)return;
-
- lives--;
- invulnerable=100;
- monkey.vy=-7;
- monkey.jumping=true;
- updateInfo();
-
- if(lives<=0){
-  endGame();
- }
-}
-
-function endGame(){
- running=false;
- panel.style.display="flex";
- message.innerHTML=
- "<h2>😢 GAME OVER</h2>"+
- "<p>Level: "+level+"</p>"+
- "<p>Score: "+score+"</p>"+
- "<p>Coins: "+coins+"</p>"+
- "<button onclick='startGame()'>TRY AGAIN</button>";
-}
-
-function completeLevel(){
- running=false;
- panel.style.display="flex";
-
- if(level===200){
-  message.innerHTML=
-  "<h2>🏆 YOU ARE THE CHAMPION!</h2>"+
-  "<p>Aapne saare 200 levels complete kar liye!</p>"+
-  "<p>Total Coins: "+coins+"</p>"+
-  "<button onclick='restartAll()'>PLAY AGAIN</button>";
+ if(monkeyLoaded){
+  ctx.drawImage(monkeyImage,player.x,player.y,player.w,player.h);
  }else{
-  message.innerHTML=
-  "<h2>🎉 LEVEL COMPLETE!</h2>"+
-  "<p>Level "+level+" complete ho gaya!</p>"+
-  "<p>Agla level shuru karein?</p>"+
-  "<button onclick='nextLevel()'>NEXT LEVEL</button>";
+  ctx.font="75px Arial";
+  ctx.fillText("🐵",player.x,player.y+75);
  }
 }
 
-function nextLevel(){
- level++;
- startGame();
+function drawObstacle(o){
+ ctx.fillStyle="#8b451f";
+ ctx.fillRect(o.x,o.y,o.w,o.h);
+ ctx.fillStyle="#c47a36";
+ ctx.fillRect(o.x+6,o.y+7,o.w-12,10);
+ ctx.strokeStyle="#4c2815";
+ ctx.lineWidth=4;
+ ctx.strokeRect(o.x,o.y,o.w,o.h);
+ ctx.fillStyle="#f1c27d";
+ ctx.fillRect(o.x+12,o.y+25,5,5);
 }
 
-function restartAll(){
- level=1;
- coins=0;
- startGame();
-}
-
-function update(){
- if(!running)return;
-
- frame++;
- speed=gameSpeed();
-
- // Timer
- let elapsed=performance.now()-levelStartTime;
- let remaining=levelDuration-elapsed;
-
- timerText.textContent="Time: "+formatTime(remaining);
- bar.style.width=Math.min(100,(elapsed/levelDuration)*100)+"%";
-
- if(remaining<=0){
-  completeLevel();
-  return;
- }
-
- if(invulnerable>0)invulnerable--;
-
- // Monkey movement
- monkey.y+=monkey.vy;
- monkey.vy+=.7;
-
- if(monkey.y>=monkey.ground){
-  monkey.y=monkey.ground;
-  monkey.vy=0;
-  monkey.jumping=false;
- }
-
- spawnItems();
-
- // Obstacles
- obstacles.forEach(o=>{
-  o.x-=speed;
-
-  if(invulnerable<=0&&collision(
-   {x:monkey.x+8,y:monkey.y+10,w:38,h:58},
-   o
-  )){
-   loseLife();
-  }
- });
-
- if(!running)return;
-
- // Collectibles
- treasures.forEach(t=>{
-  t.x-=speed;
-
-  if(!t.taken&&collision(
-   {x:monkey.x,y:monkey.y,w:55,h:65},
-   {x:t.x-12,y:t.y-12,w:24,h:24}
-  )){
-   t.taken=true;
-   if(t.type==="coin"){
-    coins++;
-    score+=10;
-   }else{
-    score+=50;
-   }
-  }
- });
-
- obstacles=obstacles.filter(o=>o.x>-60);
- treasures=treasures.filter(t=>t.x>-60&&!t.taken);
-
- score++;
- updateInfo();
+function drawTreasure(t){
+ ctx.font="32px Arial";
+ ctx.fillText(t.type==="coin"?"🪙":"🍌",t.x,t.y);
 }
 
 function draw(){
  drawBackground();
- drawItems();
+ obstacles.forEach(drawObstacle);
+ treasures.forEach(drawTreasure);
  drawMonkey();
 
- ctx.fillStyle="#17213a";
- ctx.font="bold 18px Arial";
- ctx.fillText("Level "+level+" - "+difficultyName(),20,30);
+ if(!running && !gameOver && !paused){
+  ctx.fillStyle="rgba(0,0,0,.35)";
+  ctx.fillRect(0,0,900,500);
+  ctx.fillStyle="white";
+  ctx.font="bold 40px Arial";
+  ctx.textAlign="center";
+  ctx.fillText("SUPER MONKEY RUNNER",450,220);
+  ctx.font="24px Arial";
+  ctx.fillText("PRESS PLAY TO START",450,270);
+  ctx.textAlign="left";
+ }
+
+ if(paused){
+  ctx.fillStyle="rgba(0,0,0,.5)";
+  ctx.fillRect(0,0,900,500);
+  ctx.fillStyle="white";
+  ctx.font="bold 50px Arial";
+  ctx.textAlign="center";
+  ctx.fillText("PAUSED",450,260);
+  ctx.textAlign="left";
+ }
+
+ if(gameOver){
+  ctx.fillStyle="rgba(0,0,0,.65)";
+  ctx.fillRect(0,0,900,500);
+  ctx.fillStyle="#ffdf45";
+  ctx.font="bold 50px Arial";
+  ctx.textAlign="center";
+  ctx.fillText(level===200?"CHAMPION!":"GAME OVER",450,220);
+  ctx.fillStyle="white";
+  ctx.font="25px Arial";
+  ctx.fillText("Score: "+score+"   Coins: "+coins,450,270);
+  ctx.fillText("RESTART dabayein",450,320);
+  ctx.textAlign="left";
+ }
 }
 
-function loop(){
- update();
+function jump(){
+ if(!running || paused || gameOver)return;
+ if(player.onGround){
+  player.vy=-16;
+  player.onGround=false;
+ }
+}
+
+function startGame(){
+ if(running)return;
+ if(gameOver)return;
+ paused=false;
+ running=true;
+ levelStart=performance.now();
+ levelDuration=getLevelDuration();
+ lastFrame=performance.now();
+ message.textContent="Run! Obstacles se bachein!";
+ requestAnimationFrame(loop);
+}
+
+function nextLevel(){
+ running=false;
+ if(level>=200){
+  gameOver=true;
+  message.textContent="🏆 MUBARAK! Aap Champion ban gaye!";
+  draw();
+  return;
+ }
+ level++;
+ obstacles=[];
+ treasures=[];
+ spawnTimer=0;
+ collectTimer=0;
+ player.y=ground-player.h;
+ player.vy=0;
+ player.onGround=true;
+ invulnerable=0;
+ levelDuration=getLevelDuration();
+ levelStart=performance.now();
+ lastFrame=performance.now();
+ updateInfo();
+ message.textContent="🎉 Level "+level+" shuru!";
+ running=true;
+ requestAnimationFrame(loop);
+}
+
+function loseLife(){
+ if(invulnerable>0)return;
+ lives--;
+ invulnerable=100;
+ player.vy=-9;
+ updateInfo();
+ if(lives<=0){
+  lives=0;
+  running=false;
+  gameOver=true;
+  message.textContent="Game Over! Restart karein.";
+ }
+}
+
+function completeLevel(){
+ running=false;
+ if(level===200){
+  gameOver=true;
+  message.textContent="🏆 Aapne 200 levels complete kar liye!";
+  draw();
+  return;
+ }
+ message.textContent="Level "+level+" complete! Agla level...";
+ draw();
+ setTimeout(nextLevel,1800);
+}
+
+function loop(now){
+ if(!running || paused || gameOver)return;
+
+ let dt=Math.min((now-lastFrame)/16.67,2);
+ lastFrame=now;
+
+ let elapsed=now-levelStart;
+ let remaining=levelDuration-elapsed;
+
+ timeText.textContent="Time: "+formatTime(remaining);
+ progress.style.width=Math.min(100,elapsed/levelDuration*100)+"%";
+
+ if(remaining<=0){
+  timeText.textContent="Time: 00:00";
+  completeLevel();
+  return;
+ }
+
+ let levelSpeed=level<=50?5:level<=100?6:level<=150?7:8;
+ speed=levelSpeed;
+
+ // Player physics
+ player.vy+=0.75*dt;
+ player.y+=player.vy*dt;
+ if(player.y+player.h>=ground){
+  player.y=ground-player.h;
+  player.vy=0;
+  player.onGround=true;
+ }
+
+ if(invulnerable>0)invulnerable-=dt;
+
+ // Obstacles
+ spawnTimer+=dt;
+ let spawnGap=level<=50?100:level<=100?82:level<=150?68:58;
+ if(spawnTimer>spawnGap){
+  spawnTimer=0;
+  let h=45+Math.random()*25;
+  obstacles.push({x:920,y:ground-h,w:35+Math.random()*15,h:h});
+ }
+
+ obstacles.forEach(o=>o.x-=speed*dt);
+ obstacles=obstacles.filter(o=>o.x+o.w>0);
+
+ // Coins and bananas
+ collectTimer+=dt;
+ if(collectTimer>75){
+  collectTimer=0;
+  let type=Math.random()<0.7?"coin":"banana";
+  treasures.push({x:930,y:ground-100-Math.random()*90,type});
+ }
+ treasures.forEach(t=>t.x-=speed*dt);
+ treasures=treasures.filter(t=>t.x>-40);
+
+ // Collision
+ let px=player.x+18,py=player.y+18;
+ let pw=player.w-35,ph=player.h-25;
+
+ obstacles.forEach(o=>{
+  if(px<o.x+o.w && px+pw>o.x &&
+     py<o.y+o.h && py+ph>o.y){
+   if(invulnerable<=0)loseLife();
+  }
+ });
+
+ treasures=treasures.filter(t=>{
+  let hit=px<t.x+25 && px+pw>t.x-10 &&
+          py<t.y+25 && py+ph>t.y-25;
+  if(hit){
+   if(t.type==="coin"){coins++;score+=10;}
+   else{score+=20;}
+   updateInfo();
+   return false;
+  }
+  return true;
+ });
+
+ score+=Math.max(1,Math.floor(dt));
+ updateInfo();
+
+ if(gameOver){
+  draw();
+  return;
+ }
+
  draw();
  requestAnimationFrame(loop);
 }
 
-updateInfo();
-timerText.textContent="Time: 04:00";
-draw();
-loop();
-
-if("serviceWorker" in navigator){
- window.addEventListener("load",()=>{
-  navigator.serviceWorker.register("service-worker.js")
-  .catch(err=>console.log("Service Worker error",err));
- });
+function restartAll(){
+ level=1;score=0;coins=0;lives=3;
+ running=false;paused=false;gameOver=false;
+ obstacles=[];treasures=[];
+ spawnTimer=0;collectTimer=0;
+ player.y=ground-player.h;
+ player.vy=0;player.onGround=true;
+ invulnerable=0;
+ levelDuration=getLevelDuration();
+ timeText.textContent="Time: 04:00";
+ progress.style.width="0%";
+ message.textContent="Play dabayein aur bandar ko daudayein!";
+ updateInfo();
+ draw();
 }
+
+document.getElementById("start").addEventListener("click",startGame);
+document.getElementById("jump").addEventListener("click",jump);
+document.getElementById("restart").addEventListener("click",restartAll);
+
+document.getElementById("pause").addEventListener("click",()=>{
+ if(running){
+  paused=true;
+  running=false;
+  message.textContent="Game paused";
+  draw();
+ }else if(paused && !gameOver){
+  paused=false;
+  running=true;
+  lastFrame=performance.now();
+  levelStart=lastFrame-(levelDuration-
+    Math.max(0,parseTime(timeText.textContent)));
+  requestAnimationFrame(loop);
+ }
+});
+
+function parseTime(text){
+ let parts=text.split(":").pop().trim().split(":");
+ return (Number(parts[0])*60+Number(parts[1]))*1000;
+}
+
+canvas.addEventListener("pointerdown",jump);
+document.addEventListener("keydown",e=>{
+ if(e.code==="Space" || e.code==="ArrowUp"){
+  e.preventDefault();jump();
+ }
+});
+
+player.y=ground-player.h;
+player.onGround=true;
+updateInfo();
+draw();
 </script>
 </body>
 </html>
