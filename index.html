@@ -1,247 +1,64 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Super Runner Game</title>
-<style>
-*{box-sizing:border-box}
-body{
- margin:0;background:#101b35;color:white;
- font-family:Arial,sans-serif;text-align:center;
-}
-h1{color:#ffd43b;margin:14px 0}
-#game{
- display:block;width:95%;max-width:800px;
- height:auto;margin:12px auto;
- background:#80d9ff;border:4px solid white;
- border-radius:14px;
-}
-button{
- padding:13px 20px;margin:5px;
- border:0;border-radius:12px;
- background:#ffbd24;color:#222;
- font-weight:bold;font-size:16px;
-}
-#info{font-size:18px;margin:10px}
-.controls{display:flex;justify-content:center;flex-wrap:wrap}
-</style>
-</head>
-<body>
-
-<h1>🏃 SUPER RUNNER</h1>
-<div id="info">
- <span id="score">Score: 0</span> |
- <span id="coins">Coins: 0</span>
-</div>
-
-<canvas id="game" width="800" height="400"></canvas>
-
-<div class="controls">
- <button onclick="startGame()">▶ Play</button>
- <button onclick="jump()">⬆ JUMP</button>
- <button onclick="changeSkin()">🎨 SKIN</button>
- <button onclick="toggleLanguage()">🌐 اردو / English</button>
-</div>
-
-<p id="message">Tap Play to start!</p>
-
-<script>
-const canvas=document.getElementById("game");
-const ctx=canvas.getContext("2d");
-
-let running=false,gameOver=false;
-let score=0,coins=0,speed=5;
-let frame=0,obstacles=[],gold=[],skin=0;
-let language="en";
-
-const skins=["#e63946","#222222","#277da1","#9b5de5","#ffd700"];
-
-const player={
- x:100,y:290,w:42,h:60,
- vy:0,jumping:false
-};
-
 function drawPlayer(){
- ctx.fillStyle=skins[skin];
- ctx.fillRect(player.x,player.y,player.w,player.h);
- ctx.fillStyle="white";
- ctx.fillRect(player.x+25,player.y+12,8,8);
- ctx.fillStyle="#222";
- ctx.fillRect(player.x+27,player.y+14,4,4);
- // Legs
- ctx.fillStyle="#172554";
- ctx.fillRect(player.x+5,player.y+50,12,12);
- ctx.fillRect(player.x+25,player.y+50,12,12);
-}
 
-function drawBackground(){
- ctx.fillStyle="#80d9ff";
- ctx.fillRect(0,0,800,400);
-
- ctx.fillStyle="#fff";
+ // Bandar ke kaan
+ ctx.fillStyle="#8B4513";
  ctx.beginPath();
- ctx.arc(650,65,30,0,Math.PI*2);
+ ctx.arc(player.x+5,player.y+8,10,0,Math.PI*2);
+ ctx.arc(player.x+37,player.y+8,10,0,Math.PI*2);
  ctx.fill();
 
- ctx.fillStyle="#55bb62";
+ // Bandar ka chehra
+ ctx.fillStyle="#A0522D";
  ctx.beginPath();
- ctx.arc(100,320,100,Math.PI,0);
- ctx.arc(300,320,120,Math.PI,0);
- ctx.arc(600,320,100,Math.PI,0);
+ ctx.arc(player.x+21,player.y+15,20,0,Math.PI*2);
  ctx.fill();
 
- ctx.fillStyle="#444";
- ctx.fillRect(0,350,800,50);
+ // Chehre ka halka hissa
+ ctx.fillStyle="#FFD39B";
+ ctx.beginPath();
+ ctx.ellipse(player.x+21,player.y+21,13,10,0,0,Math.PI*2);
+ ctx.fill();
 
+ // Aankhein
  ctx.fillStyle="white";
- for(let i=0;i<800;i+=100){
-  ctx.fillRect((i-frame*speed%100),370,45,5);
- }
+ ctx.beginPath();
+ ctx.arc(player.x+14,player.y+12,5,0,Math.PI*2);
+ ctx.arc(player.x+28,player.y+12,5,0,Math.PI*2);
+ ctx.fill();
+
+ ctx.fillStyle="black";
+ ctx.fillRect(player.x+15,player.y+11,3,4);
+ ctx.fillRect(player.x+29,player.y+11,3,4);
+
+ // Muskurata munh
+ ctx.strokeStyle="#54220c";
+ ctx.lineWidth=2;
+ ctx.beginPath();
+ ctx.arc(player.x+21,player.y+22,6,0,Math.PI);
+ ctx.stroke();
+
+ // Bandar ka jism
+ ctx.fillStyle="#8B4513";
+ ctx.fillRect(player.x+8,player.y+34,28,22);
+
+ // Haath
+ ctx.fillRect(player.x,player.y+36,10,7);
+ ctx.fillRect(player.x+34,player.y+36,10,7);
+
+ // Pair
+ ctx.fillStyle="#5b2d13";
+ ctx.fillRect(player.x+8,player.y+52,12,8);
+ ctx.fillRect(player.x+25,player.y+52,12,8);
+
+ // Ghoomti hui dum
+ ctx.strokeStyle="#8B4513";
+ ctx.lineWidth=5;
+ ctx.beginPath();
+ ctx.moveTo(player.x+35,player.y+43);
+ ctx.quadraticCurveTo(
+  player.x+60,player.y+25,
+  player.x+47,player.y+8
+ );
+ ctx.stroke();
 }
-
-function drawObjects(){
- obstacles.forEach(o=>{
-  ctx.fillStyle="#9b4d20";
-  ctx.fillRect(o.x,o.y,o.w,o.h);
-  ctx.fillStyle="#d9822b";
-  ctx.fillRect(o.x+7,o.y+8,o.w-14,8);
- });
-
- gold.forEach(c=>{
-  ctx.fillStyle="#ffcf24";
-  ctx.beginPath();
-  ctx.arc(c.x,c.y,12,0,Math.PI*2);
-  ctx.fill();
-  ctx.fillStyle="#fff3a3";
-  ctx.fillRect(c.x-3,c.y-7,5,14);
- });
-}
-
-function startGame(){
- score=0;coins=0;speed=5;frame=0;
- obstacles=[];gold=[];
- player.y=290;player.vy=0;
- player.jumping=false;
- gameOver=false;running=true;
- document.getElementById("message").textContent=
- language==="en"?"Run and collect coins!":"Daudein aur coins jama karein!";
- requestAnimationFrame(loop);
-}
-
-function jump(){
- if(running && !player.jumping){
-  player.vy=-15;
-  player.jumping=true;
- }
-}
-
-function changeSkin(){
- skin=(skin+1)%skins.length;
- document.getElementById("message").textContent=
- "Skin "+(skin+1)+" selected!";
-}
-
-function toggleLanguage(){
- language=language==="en"?"ur":"en";
- document.getElementById("message").textContent=
- language==="en"?"Language: English":"زبان: اردو";
-}
-
-function collision(a,b){
- return a.x < b.x+b.w &&
- a.x+a.w > b.x &&
- a.y < b.y+b.h &&
- a.y+a.h > b.y;
-}
-
-function loop(){
- if(!running)return;
-
- frame++;
- score++;
-
- drawBackground();
-
- // Player physics
- player.y+=player.vy;
- player.vy+=0.7;
-
- if(player.y>=290){
-  player.y=290;
-  player.vy=0;
-  player.jumping=false;
- }
-
- // Create obstacles
- if(frame%95===0){
-  obstacles.push({x:820,y:315,w:35,h:35});
- }
-
- // Create coins
- if(frame%65===0){
-  gold.push({x:820,y:260,w:24,h:24});
- }
-
- // Move obstacles
- obstacles.forEach(o=>o.x-=speed);
- gold.forEach(c=>c.x-=speed);
-
- obstacles=obstacles.filter(o=>o.x>-50);
- gold=gold.filter(c=>c.x>-30);
-
- // Obstacle collision
- for(let o of obstacles){
-  if(collision(player,o)){
-   endGame();
-   return;
-  }
- }
-
- // Collect coins
- gold=gold.filter(c=>{
-  if(collision(player,c)){
-   coins++;
-   return false;
-  }
-  return true;
- });
-
- drawObjects();
- drawPlayer();
-
- document.getElementById("score").textContent=
- (language==="en"?"Score: ":"اسکور: ")+score;
- document.getElementById("coins").textContent=
- (language==="en"?"Coins: ":"سکے: ")+coins;
-
- if(frame%500===0)speed+=0.5;
-
- requestAnimationFrame(loop);
-}
-
-function endGame(){
- running=false;
- gameOver=true;
- document.getElementById("message").textContent=
- language==="en"
- ? "GAME OVER! Score: "+score+" | Tap Play to restart."
- : "گیم ختم! اسکور: "+score+" | دوبارہ کھیلنے کے لیے Play دبائیں۔";
-}
-
-// Keyboard controls
-document.addEventListener("keydown",e=>{
- if(e.code==="Space"||e.code==="ArrowUp"){
-  e.preventDefault();jump();
- }
-});
-
-// Tap canvas to jump
-canvas.addEventListener("pointerdown",jump);
-
-drawBackground();
-drawPlayer();
-</script>
-</body>
-</html>
