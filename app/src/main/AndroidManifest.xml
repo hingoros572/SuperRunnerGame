@@ -6,9 +6,7 @@
         android:allowBackup="true"
         android:label="Super Monkey Runner"
         android:icon="@drawable/app_icon"
-        android:roundIcon="@drawable/app_icon"
-        android:theme="@android:style/Theme.Material.Light.NoActionBar"
-        android:usesCleartextTraffic="true">
+        android:theme="@android:style/Theme.Material.Light.NoActionBar">
 
         <activity
             android:name=".MainActivity"
