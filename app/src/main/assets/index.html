@@ -3,13 +3,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#10243b">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#80d7ff">
 <title>Super Monkey Runner</title>
 
 <style>
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html, body {
@@ -18,124 +19,93 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #10243b;
-  color: white;
+  background: #80d7ff;
   font-family: Arial, sans-serif;
-  text-align: center;
-  overscroll-behavior: none;
 }
 
 body {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   justify-content: flex-start;
-  padding: 2px;
 }
 
 h2 {
-  font-size: 17px;
-  line-height: 21px;
-  margin: 2px 0;
+  margin: 0;
+  padding: 5px;
+  background: #10243b;
+  color: white;
+  text-align: center;
+  font-size: 16px;
   flex-shrink: 0;
 }
 
 #info {
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
   align-items: center;
   flex-wrap: wrap;
-  gap: 5px 13px;
-  width: 100%;
-  padding: 3px;
+  background: #10243b;
+  color: white;
   font-size: 12px;
   font-weight: bold;
+  padding: 5px 2px;
+  flex-shrink: 0;
+  gap: 5px;
+}
+
+#game {
+  display: block;
+  width: 100%;
+  height: auto;
+  flex: 1;
+  min-height: 0;
+  object-fit: fill;
+  border: none;
+  margin: 0;
+  padding: 0;
+  background: #80d7ff;
+  touch-action: manipulation;
+}
+
+#message {
+  background: #10243b;
+  color: white;
+  text-align: center;
+  font-weight: bold;
+  font-size: 12px;
+  padding: 4px;
+  min-height: 22px;
   flex-shrink: 0;
 }
 
 .controls {
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
   align-items: center;
-  gap: 5px;
   width: 100%;
-  padding: 2px;
+  background: #10243b;
+  padding: 7px 4px;
+  gap: 5px;
   flex-shrink: 0;
 }
 
 button {
-  padding: 8px 15px;
-  margin: 1px;
-  border: 0;
-  border-radius: 9px;
-  font-size: 13px;
-  font-weight: bold;
+  flex: 1;
+  max-width: 150px;
+  padding: 12px 5px;
+  border: none;
+  border-radius: 12px;
   background: #ffc928;
   color: #222;
+  font-size: 14px;
+  font-weight: bold;
   touch-action: manipulation;
 }
 
 button:active {
-  transform: scale(0.94);
-  background: #ff9f1c;
-}
-
-#game {
-  display: block;
-  width: min(100vw, calc((100dvh - 105px) * 2));
-  height: auto;
-  max-width: 100%;
-  max-height: calc(100dvh - 105px);
-  aspect-ratio: 2 / 1;
-  object-fit: contain;
-  margin: 2px auto;
-  border: 2px solid white;
-  background: #80d7ff;
-  touch-action: manipulation;
-  flex-shrink: 1;
-}
-
-#message {
-  font-size: 12px;
-  font-weight: bold;
-  padding: 2px;
-  min-height: 18px;
-  flex-shrink: 0;
-}
-
-@media (max-height: 420px) {
-  h2 {
-    font-size: 14px;
-    line-height: 17px;
-    margin: 0;
-  }
-
-  #info {
-    font-size: 10px;
-    padding: 1px;
-    gap: 4px 10px;
-  }
-
-  button {
-    padding: 6px 13px;
-    font-size: 12px;
-  }
-
-  .controls {
-    padding: 1px;
-  }
-
-  #game {
-    width: min(100vw, calc((100dvh - 85px) * 2));
-    max-height: calc(100dvh - 85px);
-    margin: 1px auto;
-  }
-
-  #message {
-    font-size: 10px;
-    min-height: 14px;
-    padding: 0;
-  }
+  background: #ff941c;
+  transform: scale(.95);
 }
 </style>
 </head>
@@ -145,22 +115,22 @@ button:active {
 <h2>🐵 SUPER MONKEY RUNNER</h2>
 
 <div id="info">
-  <span id="level">Level: 1</span>
+  <span id="level">Level: 1/200</span>
   <span id="score">Score: 0</span>
   <span id="coins">Coins: 0</span>
   <span id="lives">❤️❤️❤️</span>
-  <span id="timer">Time: 04:00</span>
+  <span id="timer">04:00</span>
 </div>
+
+<canvas id="game" width="900" height="450"></canvas>
+
+<div id="message">Press PLAY to start!</div>
 
 <div class="controls">
   <button onclick="startGame()">▶ PLAY</button>
   <button onclick="togglePause()">⏸ PAUSE</button>
   <button onclick="jump()">⬆ JUMP</button>
 </div>
-
-<canvas id="game" width="900" height="450"></canvas>
-
-<div id="message">Press PLAY to start!</div>
 
 <script>
 const canvas = document.getElementById("game");
@@ -193,12 +163,8 @@ let obstacles = [];
 let treasures = [];
 
 const player = {
-  x: 110,
-  y: 300,
-  w: 85,
-  h: 95,
-  vy: 0,
-  ground: true
+  x: 110, y: 300, w: 85, h: 95,
+  vy: 0, ground: true
 };
 
 const groundY = 395;
@@ -227,18 +193,14 @@ function formatTime(t) {
 function updateInfo() {
   document.getElementById("level").textContent =
     "Level: " + level + "/200";
-
   document.getElementById("score").textContent =
     "Score: " + score;
-
   document.getElementById("coins").textContent =
     "Coins: " + coins;
-
   document.getElementById("lives").textContent =
-    "❤️".repeat(lives) + "🖤".repeat(3 - lives);
-
+    "❤️".repeat(lives) + "🖤".repeat(3-lives);
   document.getElementById("timer").textContent =
-    "Time: " + formatTime(timeLeft);
+    formatTime(timeLeft);
 }
 
 function startGame() {
@@ -247,27 +209,24 @@ function startGame() {
   coins = 0;
   lives = 3;
   timeLeft = levelDuration(level);
-
   obstacles = [];
   treasures = [];
-
   spawnTimer = 0;
   coinTimer = 0;
   invulnerable = 0;
 
-  player.y = groundY - player.h;
+  player.y = groundY-player.h;
   player.vy = 0;
   player.ground = true;
 
   running = true;
   paused = false;
   gameOver = false;
-
   lastTime = 0;
   animationTime = 0;
 
   document.getElementById("message").textContent =
-    "Run Monkey! Collect bananas and coins!";
+    "Run Monkey! Collect coins and bananas!";
 
   updateInfo();
   draw();
@@ -289,7 +248,7 @@ function togglePause() {
   paused = !paused;
 
   document.getElementById("message").textContent =
-    paused ? "Game Paused" : "Keep Running!";
+    paused ? "GAME PAUSED" : "KEEP RUNNING!";
 
   if (!paused) {
     lastTime = 0;
@@ -309,238 +268,202 @@ document.addEventListener("keydown", e => {
 });
 
 function drawBackground() {
-  let sky = ctx.createLinearGradient(0, 0, 0, 450);
-  sky.addColorStop(0, "#54c9ff");
-  sky.addColorStop(1, "#d4f6ff");
+  let sky = ctx.createLinearGradient(0,0,0,450);
+  sky.addColorStop(0,"#54c9ff");
+  sky.addColorStop(1,"#d4f6ff");
 
   ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, 900, 450);
+  ctx.fillRect(0,0,900,450);
 
   ctx.fillStyle = "#fff";
-  drawCloud(150, 75);
-  drawCloud(430, 110);
-  drawCloud(730, 65);
+  drawCloud(150,75);
+  drawCloud(430,110);
+  drawCloud(730,65);
 
   ctx.fillStyle = "#ffd43b";
   ctx.beginPath();
-  ctx.arc(790, 90, 40, 0, Math.PI * 2);
+  ctx.arc(790,90,40,0,Math.PI*2);
   ctx.fill();
 
   ctx.fillStyle = "#60b85b";
   ctx.beginPath();
-  ctx.moveTo(0, 310);
-  ctx.quadraticCurveTo(230, 170, 460, 310);
-  ctx.quadraticCurveTo(680, 185, 900, 300);
-  ctx.lineTo(900, 450);
-  ctx.lineTo(0, 450);
+  ctx.moveTo(0,310);
+  ctx.quadraticCurveTo(230,170,460,310);
+  ctx.quadraticCurveTo(680,185,900,300);
+  ctx.lineTo(900,450);
+  ctx.lineTo(0,450);
   ctx.fill();
 
   ctx.fillStyle = "#4b963f";
-  ctx.fillRect(0, groundY, 900, 55);
+  ctx.fillRect(0,groundY,900,55);
 
   ctx.fillStyle = "#77502e";
-  ctx.fillRect(0, groundY + 15, 900, 40);
+  ctx.fillRect(0,groundY+15,900,40);
 
   ctx.fillStyle = "#f6d88a";
-
-  for (let x = 0; x < 900; x += 80) {
-    ctx.fillRect(x, groundY + 25, 40, 5);
+  for(let x=0;x<900;x+=80) {
+    ctx.fillRect(x,groundY+25,40,5);
   }
 }
 
-function drawCloud(x, y) {
+function drawCloud(x,y) {
   ctx.beginPath();
-  ctx.arc(x, y, 22, 0, Math.PI * 2);
-  ctx.arc(x + 25, y - 12, 28, 0, Math.PI * 2);
-  ctx.arc(x + 55, y, 22, 0, Math.PI * 2);
+  ctx.arc(x,y,22,0,Math.PI*2);
+  ctx.arc(x+25,y-12,28,0,Math.PI*2);
+  ctx.arc(x+55,y,22,0,Math.PI*2);
   ctx.fill();
 }
 
 function drawMonkey() {
-  if (invulnerable > 0 &&
-      Math.floor(animationTime / 70) % 2 === 0) {
-    return;
-  }
+  if(invulnerable>0 &&
+     Math.floor(animationTime/70)%2===0) return;
 
-  if (runLoaded) {
-    const fw = runImage.naturalWidth / 4;
-    const fh = runImage.naturalHeight;
-    const frame = Math.floor(animationTime / 110) % 4;
+  if(runLoaded) {
+    const fw=runImage.naturalWidth/4;
+    const fh=runImage.naturalHeight;
+    const frame=Math.floor(animationTime/110)%4;
 
-    ctx.drawImage(
-      runImage,
-      frame * fw, 0, fw, fh,
-      player.x, player.y, player.w, player.h
-    );
-
-  } else if (stillLoaded) {
-    ctx.drawImage(
-      stillImage,
-      player.x, player.y, player.w, player.h
-    );
-
+    ctx.drawImage(runImage,frame*fw,0,fw,fh,
+      player.x,player.y,player.w,player.h);
+  } else if(stillLoaded) {
+    ctx.drawImage(stillImage,
+      player.x,player.y,player.w,player.h);
   } else {
-    ctx.font = "75px Arial";
-    ctx.fillText("🐵", player.x, player.y + 75);
+    ctx.font="75px Arial";
+    ctx.fillText("🐵",player.x,player.y+75);
   }
 }
 
 function drawObstacle(o) {
-  ctx.fillStyle = "#995522";
-  ctx.fillRect(o.x, o.y, o.w, o.h);
-
-  ctx.strokeStyle = "#512c12";
-  ctx.lineWidth = 5;
-  ctx.strokeRect(o.x, o.y, o.w, o.h);
-
+  ctx.fillStyle="#995522";
+  ctx.fillRect(o.x,o.y,o.w,o.h);
+  ctx.strokeStyle="#512c12";
+  ctx.lineWidth=5;
+  ctx.strokeRect(o.x,o.y,o.w,o.h);
   ctx.beginPath();
-  ctx.moveTo(o.x, o.y + o.h / 2);
-  ctx.lineTo(o.x + o.w, o.y + o.h / 2);
+  ctx.moveTo(o.x,o.y+o.h/2);
+  ctx.lineTo(o.x+o.w,o.y+o.h/2);
   ctx.stroke();
 }
 
 function drawTreasure(t) {
-  ctx.font = "30px Arial";
-  ctx.fillText(t.type === "coin" ? "🪙" : "🍌", t.x, t.y);
+  ctx.font="30px Arial";
+  ctx.fillText(t.type==="coin"?"🪙":"🍌",t.x,t.y);
 }
 
 function spawnObjects(dt) {
-  spawnTimer += dt;
-  coinTimer += dt;
+  spawnTimer+=dt;
+  coinTimer+=dt;
 
-  if (spawnTimer > Math.max(0.75, 1.7 / difficulty())) {
+  if(spawnTimer>Math.max(0.75,1.7/difficulty())) {
     obstacles.push({
-      x: 930,
-      y: groundY - 48,
-      w: 48,
-      h: 48
+      x:930,y:groundY-48,w:48,h:48
     });
-
-    spawnTimer = 0;
+    spawnTimer=0;
   }
 
-  if (coinTimer > 1.15) {
+  if(coinTimer>1.15) {
     treasures.push({
-      x: 930,
-      y: 220 + Math.random() * 100,
-      type: Math.random() < 0.55 ? "coin" : "banana"
+      x:930,
+      y:220+Math.random()*100,
+      type:Math.random()<0.55?"coin":"banana"
     });
-
-    coinTimer = 0;
+    coinTimer=0;
   }
 }
 
-function hit(a, b) {
-  return a.x + 15 < b.x + b.w &&
-         a.x + a.w - 15 > b.x &&
-         a.y + 12 < b.y + b.h &&
-         a.y + a.h - 10 > b.y;
+function hit(a,b) {
+  return a.x+15<b.x+b.w &&
+    a.x+a.w-15>b.x &&
+    a.y+12<b.y+b.h &&
+    a.y+a.h-10>b.y;
 }
 
 function nextLevel() {
-  if (level >= 200) {
-    running = false;
-    gameOver = true;
-
+  if(level>=200) {
+    running=false;
+    gameOver=true;
     document.getElementById("message").textContent =
       "🏆 CHAMPION! You completed all 200 levels!";
-
     draw();
     return;
   }
 
   level++;
-  timeLeft = levelDuration(level);
-
-  obstacles = [];
-  treasures = [];
-  spawnTimer = 0;
+  timeLeft=levelDuration(level);
+  obstacles=[];
+  treasures=[];
+  spawnTimer=0;
 
   document.getElementById("message").textContent =
-    "🎉 Level " + level + " started!";
+    "🎉 Level "+level+" started!";
 
   updateInfo();
 }
 
 function endGame() {
-  running = false;
-  gameOver = true;
-
+  running=false;
+  gameOver=true;
   document.getElementById("message").textContent =
-    "GAME OVER! Score: " + score + " | Press Restart";
-
+    "GAME OVER! Score: "+score+" | Press PLAY";
   draw();
 }
 
 function update(dt) {
-  animationTime += dt * 1000;
+  animationTime+=dt*1000;
 
-  if (invulnerable > 0) {
-    invulnerable -= dt * 1000;
-  }
+  if(invulnerable>0) invulnerable-=dt*1000;
 
-  timeLeft -= dt;
+  timeLeft-=dt;
 
-  if (timeLeft <= 0) {
+  if(timeLeft<=0) {
     nextLevel();
     return;
   }
 
-  score += Math.floor(dt * 10);
+  score+=Math.floor(dt*10);
 
-  player.vy += 0.75;
-  player.y += player.vy;
+  player.vy+=0.75;
+  player.y+=player.vy;
 
-  if (player.y + player.h >= groundY) {
-    player.y = groundY - player.h;
-    player.vy = 0;
-    player.ground = true;
+  if(player.y+player.h>=groundY) {
+    player.y=groundY-player.h;
+    player.vy=0;
+    player.ground=true;
   }
 
   spawnObjects(dt);
 
-  let speed = 300 * difficulty();
+  let speed=300*difficulty();
 
-  obstacles.forEach(o => o.x -= speed * dt);
-  treasures.forEach(t => t.x -= speed * dt);
+  obstacles.forEach(o=>o.x-=speed*dt);
+  treasures.forEach(t=>t.x-=speed*dt);
 
-  obstacles = obstacles.filter(o => o.x + o.w > 0);
-  treasures = treasures.filter(t => t.x + 35 > 0);
+  obstacles=obstacles.filter(o=>o.x+o.w>0);
+  treasures=treasures.filter(t=>t.x+35>0);
 
-  for (let i = 0; i < obstacles.length; i++) {
-    if (hit(player, obstacles[i]) && invulnerable <= 0) {
+  for(let i=0;i<obstacles.length;i++) {
+    if(hit(player,obstacles[i])&&invulnerable<=0) {
       lives--;
-      invulnerable = 1500;
+      invulnerable=1500;
+      obstacles.splice(i,1);
 
-      obstacles.splice(i, 1);
-
-      if (lives <= 0) {
+      if(lives<=0) {
         endGame();
         return;
       }
-
       break;
     }
   }
 
-  for (let i = treasures.length - 1; i >= 0; i--) {
-    let t = treasures[i];
+  for(let i=treasures.length-1;i>=0;i--) {
+    let t=treasures[i];
+    let box={x:t.x,y:t.y-25,w:30,h:30};
 
-    let box = {
-      x: t.x,
-      y: t.y - 25,
-      w: 30,
-      h: 30
-    };
-
-    if (hit(player, box)) {
-      if (t.type === "coin") {
-        coins++;
-      } else {
-        score += 50;
-      }
-
-      treasures.splice(i, 1);
+    if(hit(player,box)) {
+      if(t.type==="coin") coins++;
+      else score+=50;
+      treasures.splice(i,1);
     }
   }
 
@@ -549,52 +472,34 @@ function update(dt) {
 
 function draw() {
   drawBackground();
-
   obstacles.forEach(drawObstacle);
   treasures.forEach(drawTreasure);
   drawMonkey();
 
-  if (paused) {
-    ctx.fillStyle = "rgba(0,0,0,.5)";
-    ctx.fillRect(0, 0, 900, 450);
-
-    ctx.fillStyle = "white";
-    ctx.font = "bold 48px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText("PAUSED", 450, 220);
-    ctx.textAlign = "left";
-  }
-
-  if (gameOver) {
-    ctx.fillStyle = "rgba(0,0,0,.55)";
-    ctx.fillRect(0, 0, 900, 450);
-
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 42px Arial";
-    ctx.textAlign = "center";
-
-    ctx.fillText(
-      level >= 200 ? "CHAMPION!" : "GAME OVER",
-      450,
-      220
-    );
-
-    ctx.textAlign = "left";
+  if(paused || gameOver) {
+    ctx.fillStyle="rgba(0,0,0,.5)";
+    ctx.fillRect(0,0,900,450);
+    ctx.fillStyle="white";
+    ctx.font="bold 48px Arial";
+    ctx.textAlign="center";
+    ctx.fillText(paused?"PAUSED":
+      (level>=200?"CHAMPION!":"GAME OVER"),450,220);
+    ctx.textAlign="left";
   }
 }
 
 function loop(timestamp) {
-  if (!running || paused || gameOver) return;
+  if(!running||paused||gameOver) return;
 
-  if (!lastTime) lastTime = timestamp;
+  if(!lastTime) lastTime=timestamp;
 
-  let dt = Math.min((timestamp - lastTime) / 1000, 0.04);
-  lastTime = timestamp;
+  let dt=Math.min((timestamp-lastTime)/1000,0.04);
+  lastTime=timestamp;
 
   update(dt);
   draw();
 
-  if (running && !paused && !gameOver) {
+  if(running&&!paused&&!gameOver) {
     requestAnimationFrame(loop);
   }
 }
