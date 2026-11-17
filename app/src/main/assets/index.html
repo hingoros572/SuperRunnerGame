@@ -432,8 +432,6 @@ victoryImage.onload = () => {
 let running = false;
 let paused = false;
 let gameOver = false;
-
-/* VICTORY STATE */
 let victoryActive = false;
 
 let level = 1;
@@ -443,6 +441,7 @@ let lives = 3;
 let timeLeft = 240;
 
 /* BANANA HEALTH COUNTER */
+
 let bananasCollected = 0;
 
 let lastTime = 0;
@@ -474,7 +473,7 @@ function levelDuration(n) {
   return 480;
 }
 
-/* UPDATED SPEED: INCREASES EVERY 25 LEVELS */
+/* SPEED INCREASES EVERY 25 LEVELS */
 
 function difficulty() {
   if (level <= 25) return 0.75;
@@ -523,16 +522,17 @@ function startGame() {
   unlockAudio();
   playSound("play");
 
-  /* STOP OLD VICTORY ANIMATION */
   victoryActive = false;
 
   level = 1;
   score = 0;
   coins = 0;
+
+  /* EVERY NEW GAME STARTS WITH 3 HEARTS */
   lives = 3;
+
   timeLeft = levelDuration(level);
 
-  /* RESET BANANA COUNTER */
   bananasCollected = 0;
 
   obstacles = [];
@@ -565,12 +565,13 @@ function startGame() {
   requestAnimationFrame(loop);
 }
 
+/* LONGER AND HIGHER JUMP */
+
 function jump() {
   if (!running || paused || gameOver) return;
 
   if (player.ground) {
-    /* STRONGER JUMP */
-    player.vy = -17.5;
+    player.vy = -19;
     player.ground = false;
     playSound("jump");
   }
@@ -604,6 +605,7 @@ document.addEventListener("keydown", e => {
 function drawBackground() {
 
   /* SELECT BACKGROUND FOR CURRENT LEVEL */
+
   let selectedBackground = null;
 
   if (running || victoryActive) {
@@ -611,7 +613,6 @@ function drawBackground() {
     selectedBackground = levelBackgrounds[backgroundIndex];
   }
 
-  /* DRAW LEVEL BACKGROUND IF LOADED */
   if (selectedBackground && selectedBackground.complete &&
       selectedBackground.naturalWidth > 0) {
 
@@ -620,6 +621,7 @@ function drawBackground() {
   }
 
   /* ORIGINAL JUNGLE BACKGROUND FALLBACK */
+
   if (bgLoaded) {
     ctx.drawImage(bgImage, 0, 0, 900, 450);
     return;
@@ -703,6 +705,7 @@ function drawMonkeyShadow() {
 function drawMonkey() {
 
   /* VICTORY SPRITE ANIMATION */
+
   if (victoryActive && victoryLoaded) {
     const fw = victoryImage.naturalWidth / 4;
     const fh = victoryImage.naturalHeight;
@@ -799,7 +802,6 @@ function nextLevel() {
     running=false;
     gameOver=true;
 
-    /* START VICTORY ANIMATION */
     victoryActive=true;
     invulnerable=0;
 
@@ -819,6 +821,10 @@ function nextLevel() {
   }
 
   level++;
+
+  /* EVERY NEW LEVEL STARTS WITH FULL 3 HEARTS */
+  lives = 3;
+
   timeLeft=levelDuration(level);
 
   obstacles=[];
@@ -828,7 +834,7 @@ function nextLevel() {
   playSound("level");
 
   document.getElementById("message").textContent =
-    "🎉 LEVEL "+level+" STARTED!";
+    "🎉 LEVEL "+level+" STARTED! ❤️❤️❤️";
 
   updateInfo();
 }
@@ -837,7 +843,6 @@ function endGame() {
   running=false;
   gameOver=true;
 
-  /* NO VICTORY ANIMATION ON GAME OVER */
   victoryActive=false;
 
   playSound("over");
@@ -866,7 +871,8 @@ function update(dt) {
 
   score+=Math.floor(dt*10);
 
-  player.vy+=0.75;
+  /* JUMP GRAVITY ADJUSTMENT */
+  player.vy+=0.72;
   player.y+=player.vy;
 
   if(player.y+player.h>=groundY) {
@@ -925,6 +931,7 @@ function update(dt) {
 
         if(bananasCollected % 10 === 0 && lives < 3) {
           lives++;
+
           document.getElementById("message").textContent =
             "❤️ 10 BANANAS! EXTRA HEALTH!";
         }
