@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#80d7ff">
+<meta name="theme-color" content="#54c9ff">
 <title>Super Monkey Runner</title>
 
 <style>
@@ -18,119 +18,142 @@ html, body {
   padding: 0;
   width: 100%;
   height: 100%;
+  height: 100dvh;
   overflow: hidden;
-  background: #80d7ff;
+  background: #54c9ff;
   font-family: Arial, sans-serif;
 }
 
-body {
+#game {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100vw;
+  height: 100%;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  touch-action: manipulation;
+}
+
+#hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  padding: 5px 7px;
+  background: linear-gradient(
+    to bottom,
+    rgba(8,22,39,.88),
+    rgba(8,22,39,.55)
+  );
+  color: white;
+}
+
+.toprow {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: flex-start;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
 }
 
 h2 {
   margin: 0;
-  padding: 5px;
-  background: #10243b;
-  color: white;
-  text-align: center;
-  font-size: 16px;
-  flex-shrink: 0;
-}
-
-#info {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  flex-wrap: wrap;
-  background: #10243b;
-  color: white;
-  font-size: 12px;
-  font-weight: bold;
-  padding: 5px 2px;
-  flex-shrink: 0;
-  gap: 5px;
-}
-
-#game {
-  display: block;
-  width: 100%;
-  height: auto;
-  flex: 1;
-  min-height: 0;
-  object-fit: fill;
-  border: none;
-  margin: 0;
-  padding: 0;
-  background: #80d7ff;
-  touch-action: manipulation;
-}
-
-#message {
-  background: #10243b;
-  color: white;
-  text-align: center;
-  font-weight: bold;
-  font-size: 12px;
-  padding: 4px;
-  min-height: 22px;
-  flex-shrink: 0;
+  font-size: clamp(12px, 3vw, 19px);
+  font-weight: 900;
+  white-space: nowrap;
+  text-shadow: 2px 2px 3px #000;
 }
 
 .controls {
   display: flex;
-  justify-content: space-around;
-  align-items: center;
-  width: 100%;
-  background: #10243b;
-  padding: 7px 4px;
   gap: 5px;
-  flex-shrink: 0;
+  align-items: center;
 }
 
 button {
-  flex: 1;
-  max-width: 150px;
-  padding: 12px 5px;
-  border: none;
-  border-radius: 12px;
+  border: 2px solid rgba(255,255,255,.7);
+  border-radius: 9px;
+  padding: 8px 11px;
+  min-width: 55px;
   background: #ffc928;
-  color: #222;
-  font-size: 14px;
-  font-weight: bold;
+  color: #18202b;
+  font-size: clamp(10px, 2.5vw, 14px);
+  font-weight: 900;
+  white-space: nowrap;
   touch-action: manipulation;
 }
 
 button:active {
   background: #ff941c;
-  transform: scale(.95);
+  transform: scale(.94);
+}
+
+#info {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 5px;
+  margin-top: 5px;
+  padding: 5px 3px;
+  border-radius: 8px;
+  background: rgba(0,0,0,.42);
+  font-size: clamp(10px, 2.5vw, 14px);
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+#message {
+  position: absolute;
+  z-index: 6;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  max-width: 90%;
+  padding: 7px 13px;
+  border-radius: 10px;
+  background: rgba(0,0,0,.65);
+  color: white;
+  text-align: center;
+  font-size: 13px;
+  font-weight: bold;
+  pointer-events: none;
+}
+
+@media (orientation: portrait) {
+  h2 { font-size: 12px; }
+  button { padding: 7px 8px; min-width: 45px; }
+  #info { font-size: 10px; }
 }
 </style>
 </head>
 
 <body>
 
-<h2>🐵 SUPER MONKEY RUNNER</h2>
-
-<div id="info">
-  <span id="level">Level: 1/200</span>
-  <span id="score">Score: 0</span>
-  <span id="coins">Coins: 0</span>
-  <span id="lives">❤️❤️❤️</span>
-  <span id="timer">04:00</span>
-</div>
-
 <canvas id="game" width="900" height="450"></canvas>
 
-<div id="message">Press PLAY to start!</div>
+<div id="hud">
+  <div class="toprow">
+    <h2>🐵 SUPER MONKEY RUNNER</h2>
 
-<div class="controls">
-  <button onclick="startGame()">▶ PLAY</button>
-  <button onclick="togglePause()">⏸ PAUSE</button>
-  <button onclick="jump()">⬆ JUMP</button>
+    <div class="controls">
+      <button onclick="startGame()">▶ PLAY</button>
+      <button onclick="togglePause()">⏸ PAUSE</button>
+      <button onclick="jump()">⬆ JUMP</button>
+    </div>
+  </div>
+
+  <div id="info">
+    <span id="level">Level: 1/200</span>
+    <span id="score">Score: 0</span>
+    <span id="coins">Coins: 0</span>
+    <span id="lives">❤️❤️❤️</span>
+    <span id="timer">04:00</span>
+  </div>
 </div>
+
+<div id="message">🐵 Welcome! Press PLAY to start!</div>
 
 <script>
 const canvas = document.getElementById("game");
@@ -139,12 +162,18 @@ const ctx = canvas.getContext("2d");
 const runImage = new Image();
 runImage.src = "monkey-run.png";
 let runLoaded = false;
-runImage.onload = () => runLoaded = true;
+runImage.onload = () => {
+  runLoaded = true;
+  draw();
+};
 
 const stillImage = new Image();
 stillImage.src = "monkey.png";
 let stillLoaded = false;
-stillImage.onload = () => stillLoaded = true;
+stillImage.onload = () => {
+  stillLoaded = true;
+  draw();
+};
 
 let running = false;
 let paused = false;
@@ -215,7 +244,8 @@ function startGame() {
   coinTimer = 0;
   invulnerable = 0;
 
-  player.y = groundY-player.h;
+  player.x = 110;
+  player.y = groundY - player.h;
   player.vy = 0;
   player.ground = true;
 
@@ -332,6 +362,38 @@ function drawMonkey() {
     ctx.font="75px Arial";
     ctx.fillText("🐵",player.x,player.y+75);
   }
+}
+
+function drawHomeScreen() {
+  drawBackground();
+
+  // Bandar home screen ke beech mein
+  const homeX = 405;
+  const homeY = 225;
+
+  if (stillLoaded) {
+    ctx.drawImage(stillImage, homeX, homeY, 100, 115);
+  } else if (runLoaded) {
+    const fw = runImage.naturalWidth / 4;
+    ctx.drawImage(runImage, 0, 0, fw, runImage.naturalHeight,
+      homeX, homeY, 100, 115);
+  } else {
+    ctx.font = "95px Arial";
+    ctx.fillText("🐵", homeX, homeY + 90);
+  }
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#fff";
+  ctx.strokeStyle = "#163b22";
+  ctx.lineWidth = 5;
+  ctx.font = "bold 43px Arial";
+  ctx.strokeText("SUPER MONKEY RUNNER", 450, 185);
+  ctx.fillText("SUPER MONKEY RUNNER", 450, 185);
+
+  ctx.font = "bold 22px Arial";
+  ctx.fillStyle = "#fff";
+  ctx.fillText("200 LEVELS • RUN • JUMP • COLLECT", 450, 385);
+  ctx.textAlign = "left";
 }
 
 function drawObstacle(o) {
@@ -471,6 +533,11 @@ function update(dt) {
 }
 
 function draw() {
+  if (!running && !gameOver) {
+    drawHomeScreen();
+    return;
+  }
+
   drawBackground();
   obstacles.forEach(drawObstacle);
   treasures.forEach(drawTreasure);
