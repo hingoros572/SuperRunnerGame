@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -111,7 +110,7 @@ html, body {
   position: absolute;
   top: 12px;
   right: 12px;
-  z-index: 20;
+  z-index: 40;
   min-width: 105px;
   padding: 9px 12px;
   border: 2px solid white;
@@ -121,6 +120,159 @@ html, body {
   font-size: 12px;
   font-weight: 900;
   box-shadow: 0 3px 10px rgba(0,0,0,.25);
+}
+
+/* LEVEL SELECTION SCREEN */
+
+#levelScreen {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 15px 12px 25px;
+  text-align: center;
+  background:
+    linear-gradient(rgba(0,35,10,.72),rgba(0,20,5,.88)),
+    url("jungle-bg.png") center center / cover no-repeat;
+}
+
+.level-heading {
+  color: #fff;
+  font-size: clamp(22px,5vw,36px);
+  font-weight: 1000;
+  text-shadow: 2px 3px 5px #000;
+  margin: 10px 0 5px;
+}
+
+.level-subheading {
+  color: #fff4a3;
+  font-weight: 900;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.level-progress {
+  display: inline-block;
+  color: white;
+  background: rgba(0,0,0,.45);
+  border: 1px solid rgba(255,255,255,.5);
+  border-radius: 25px;
+  padding: 9px 18px;
+  margin-bottom: 15px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.level-legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.level-legend span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.level-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px 7px;
+  max-width: 650px;
+  margin: 0 auto;
+  padding: 5px 2px 20px;
+}
+
+.level-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  clip-path: polygon(
+    50% 0%,
+    62% 28%,
+    96% 28%,
+    70% 49%,
+    80% 84%,
+    50% 65%,
+    20% 84%,
+    30% 49%,
+    4% 28%,
+    38% 28%
+  );
+  color: #563000;
+  background: linear-gradient(145deg,#fff37b,#ffad16 65%,#e77800);
+  filter: drop-shadow(0 3px 3px rgba(0,0,0,.5));
+  cursor: pointer;
+  font-weight: 1000;
+}
+
+.level-card:active {
+  transform: scale(.91);
+}
+
+.level-card .star-symbol {
+  font-size: clamp(19px,5vw,31px);
+  line-height: 1;
+  text-shadow: 1px 2px 2px rgba(120,60,0,.35);
+}
+
+.level-card .level-number {
+  font-size: clamp(12px,3vw,18px);
+  margin-top: 1px;
+  text-shadow: 1px 1px 1px rgba(255,255,255,.4);
+}
+
+.level-card.completed {
+  background: linear-gradient(145deg,#fff99b,#ffbf00 55%,#ff8500);
+}
+
+.level-card.unlocked {
+  background: linear-gradient(145deg,#fff5a1,#ffc12a 60%,#ed8900);
+}
+
+.level-card.locked {
+  background: linear-gradient(145deg,#b9c0c2,#737d82 65%,#465158);
+  color: #30383b;
+  cursor: not-allowed;
+  filter: grayscale(.35);
+}
+
+.level-card .lock-symbol {
+  font-size: clamp(17px,4vw,25px);
+  line-height: 1;
+}
+
+.level-card .mini-stars {
+  color: white;
+  font-size: clamp(7px,1.8vw,11px);
+  letter-spacing: -1px;
+  text-shadow: 1px 1px 2px #9a5700;
+  margin-top: 1px;
+}
+
+#backHome {
+  padding: 11px 25px;
+  border: 2px solid white;
+  border-radius: 30px;
+  background: linear-gradient(#fff16a,#ffad18);
+  color: #573000;
+  font-weight: 1000;
+  font-size: 15px;
+  margin: 5px auto 20px;
 }
 
 /* GAME HUD */
@@ -223,6 +375,14 @@ h2 {
   .game-btn { padding: 7px 8px; min-width: 43px; }
   #info { font-size: 9px; gap: 3px; padding: 6px 3px; }
   .sound-btn { top: 8px; right: 8px; }
+  .level-grid { gap: 9px 5px; }
+}
+
+@media (min-width: 600px) {
+  .level-grid {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 14px 10px;
+  }
 }
 </style>
 </head>
@@ -243,13 +403,35 @@ h2 {
     onerror="this.style.display='none'"
   >
 
-  <button id="homePlay" onclick="startGame()">
+  <button id="homePlay" onclick="openLevelSelect()">
     ▶ PLAY NOW
   </button>
 
   <div class="home-levels">
     🏆 200 LEVELS • RUN • JUMP • COLLECT
   </div>
+</div>
+
+<!-- LEVEL SELECTION -->
+<div id="levelScreen">
+  <div class="level-heading">⭐ SELECT YOUR LEVEL ⭐</div>
+  <div class="level-subheading">SUPER MONKEY RUNNER</div>
+
+  <div class="level-progress" id="levelProgress">
+    ⭐ UNLOCKED: 1 / 200
+  </div>
+
+  <div class="level-legend">
+    <span>🌟 Unlocked</span>
+    <span>🏆 Completed</span>
+    <span>🔒 Locked</span>
+  </div>
+
+  <div class="level-grid" id="levelGrid"></div>
+
+  <button id="backHome" onclick="closeLevelSelect()">
+    ◀ BACK TO HOME
+  </button>
 </div>
 
 <!-- HOME SOUND BUTTON -->
@@ -285,6 +467,126 @@ h2 {
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
+
+/* LEVEL PROGRESS SAVE SYSTEM */
+
+let completedLevels = [];
+let maxUnlockedLevel = 1;
+
+function loadLevelProgress() {
+  try {
+    const saved = JSON.parse(
+      localStorage.getItem("superMonkeyLevelProgress") || "{}"
+    );
+
+    if (Array.isArray(saved.completed)) {
+      completedLevels = saved.completed
+        .filter(n => Number.isInteger(n) && n >= 1 && n <= 200);
+    }
+
+    maxUnlockedLevel = Math.max(
+      1,
+      Math.min(200, Number(saved.unlocked) || 1)
+    );
+
+  } catch (e) {
+    completedLevels = [];
+    maxUnlockedLevel = 1;
+  }
+}
+
+function saveLevelProgress() {
+  try {
+    localStorage.setItem(
+      "superMonkeyLevelProgress",
+      JSON.stringify({
+        completed: completedLevels,
+        unlocked: maxUnlockedLevel
+      })
+    );
+  } catch (e) {}
+}
+
+function completeLevel(n) {
+  if (!completedLevels.includes(n)) {
+    completedLevels.push(n);
+  }
+
+  if (n < 200) {
+    maxUnlockedLevel = Math.max(maxUnlockedLevel, n + 1);
+  }
+
+  saveLevelProgress();
+  renderLevelCards();
+}
+
+/* LEVEL CARD DISPLAY */
+
+function renderLevelCards() {
+  const grid = document.getElementById("levelGrid");
+  if (!grid) return;
+
+  grid.innerHTML = "";
+
+  for (let n = 1; n <= 200; n++) {
+    const card = document.createElement("button");
+    card.className = "level-card";
+
+    const completed = completedLevels.includes(n);
+    const unlocked = n <= maxUnlockedLevel;
+
+    if (completed) {
+      card.classList.add("completed");
+      card.innerHTML =
+        '<span class="star-symbol">★</span>' +
+        '<span class="level-number">' + n + '</span>' +
+        '<span class="mini-stars">★★★</span>';
+
+      card.title = "Level " + n + " Completed";
+
+    } else if (unlocked) {
+      card.classList.add("unlocked");
+      card.innerHTML =
+        '<span class="star-symbol">★</span>' +
+        '<span class="level-number">' + n + '</span>';
+
+      card.title = "Play Level " + n;
+
+    } else {
+      card.classList.add("locked");
+      card.innerHTML =
+        '<span class="lock-symbol">🔒</span>' +
+        '<span class="level-number">' + n + '</span>';
+
+      card.title = "Level Locked";
+      card.disabled = true;
+    }
+
+    if (unlocked) {
+      card.onclick = function() {
+        startGame(n);
+      };
+    }
+
+    grid.appendChild(card);
+  }
+
+  document.getElementById("levelProgress").textContent =
+    "⭐ UNLOCKED: " + maxUnlockedLevel + " / 200";
+}
+
+function openLevelSelect() {
+  renderLevelCards();
+
+  document.getElementById("homeScreen").style.display = "none";
+  document.getElementById("levelScreen").style.display = "block";
+  document.getElementById("homeSound").style.display = "block";
+}
+
+function closeLevelSelect() {
+  document.getElementById("levelScreen").style.display = "none";
+  document.getElementById("homeScreen").style.display = "flex";
+}
 
 /* SOUND SYSTEM */
 
@@ -519,18 +821,19 @@ function updateInfo() {
 
 function showGame() {
   document.getElementById("homeScreen").style.display = "none";
+  document.getElementById("levelScreen").style.display = "none";
   document.getElementById("homeSound").style.display = "none";
   document.getElementById("hud").style.display = "block";
   document.getElementById("message").style.display = "block";
 }
 
-function startGame() {
+function startGame(selectedLevel = 1) {
   unlockAudio();
   playSound("play");
 
   victoryActive = false;
 
-  level = 1;
+  level = selectedLevel;
   score = 0;
   coins = 0;
 
@@ -804,6 +1107,11 @@ function hit(a,b) {
 }
 
 function nextLevel() {
+
+  /* CURRENT LEVEL SUCCESS AND SAVE */
+
+  completeLevel(level);
+
   if(level>=200) {
     running=false;
     gameOver=true;
@@ -1014,6 +1322,10 @@ function loop(timestamp) {
   }
 }
 
+/* STARTUP */
+
+loadLevelProgress();
+renderLevelCards();
 updateSoundButtons();
 draw();
 updateInfo();
