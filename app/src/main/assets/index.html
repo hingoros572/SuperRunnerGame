@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#54c9ff">
+<meta name="theme-color" content="#168b38">
 <title>Super Monkey Runner</title>
 
 <style>
@@ -20,73 +20,149 @@ html, body {
   height: 100%;
   height: 100dvh;
   overflow: hidden;
-  background: #54c9ff;
+  background: #168b38;
   font-family: Arial, sans-serif;
+  touch-action: manipulation;
 }
 
 #game {
   position: absolute;
   inset: 0;
-  display: block;
-  width: 100vw;
+  width: 100%;
   height: 100%;
+  display: block;
   border: 0;
-  margin: 0;
-  padding: 0;
   touch-action: manipulation;
 }
 
+/* PROFESSIONAL HOME SCREEN */
+
+#homeScreen {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  background:
+    linear-gradient(rgba(0,30,10,.12),rgba(0,30,10,.25)),
+    url("jungle-bg.png") center center / 100% 100% no-repeat;
+}
+
+.home-title {
+  color: #fff;
+  font-size: clamp(25px, 5vw, 52px);
+  font-weight: 1000;
+  letter-spacing: 1px;
+  text-shadow:
+    3px 4px 0 #174b1c,
+    0 0 15px #174b1c;
+  margin-bottom: 5px;
+}
+
+.home-subtitle {
+  color: #fff6b0;
+  font-size: clamp(13px, 2.5vw, 22px);
+  font-weight: 900;
+  text-shadow: 2px 3px 4px #174b1c;
+  margin-bottom: 4px;
+}
+
+.home-monkey {
+  width: clamp(110px, 23vw, 190px);
+  height: clamp(120px, 27vw, 210px);
+  object-fit: contain;
+  filter: drop-shadow(0 9px 8px rgba(0,0,0,.4));
+  animation: monkeyBounce 1.4s infinite ease-in-out;
+}
+
+@keyframes monkeyBounce {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+#homePlay {
+  min-width: 190px;
+  padding: 15px 35px;
+  border: 3px solid white;
+  border-radius: 50px;
+  background: linear-gradient(180deg,#fff16a,#ffad16);
+  color: #613000;
+  font-size: 23px;
+  font-weight: 1000;
+  box-shadow: 0 7px 0 #a94e08, 0 10px 20px rgba(0,0,0,.3);
+  margin-top: 12px;
+}
+
+#homePlay:active {
+  transform: translateY(5px);
+  box-shadow: 0 2px 0 #a94e08;
+}
+
+.home-levels {
+  color: white;
+  font-size: clamp(11px, 2vw, 17px);
+  font-weight: 900;
+  text-shadow: 2px 2px 4px #17451c;
+  margin-top: 18px;
+}
+
+/* TRANSPARENT GAME HUD */
+
 #hud {
+  display: none;
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   z-index: 5;
-  padding: 5px 7px;
+  padding: 7px 9px;
+  color: white;
   background: linear-gradient(
     to bottom,
-    rgba(8,22,39,.88),
-    rgba(8,22,39,.55)
+    rgba(0,35,15,.35),
+    rgba(0,35,15,0)
   );
-  color: white;
 }
 
 .toprow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 5px;
+  gap: 6px;
 }
 
 h2 {
   margin: 0;
-  font-size: clamp(12px, 3vw, 19px);
-  font-weight: 900;
+  font-size: clamp(12px, 2.7vw, 19px);
+  font-weight: 1000;
+  text-shadow: 2px 2px 4px #000;
   white-space: nowrap;
-  text-shadow: 2px 2px 3px #000;
 }
 
 .controls {
   display: flex;
-  gap: 5px;
   align-items: center;
+  gap: 6px;
 }
 
 button {
-  border: 2px solid rgba(255,255,255,.7);
-  border-radius: 9px;
-  padding: 8px 11px;
+  border: 2px solid rgba(255,255,255,.9);
+  border-radius: 12px;
+  padding: 8px 12px;
   min-width: 55px;
-  background: #ffc928;
-  color: #18202b;
+  background: linear-gradient(#ffe96a,#ffad18);
+  color: #422500;
   font-size: clamp(10px, 2.5vw, 14px);
-  font-weight: 900;
+  font-weight: 1000;
   white-space: nowrap;
   touch-action: manipulation;
 }
 
 button:active {
-  background: #ff941c;
   transform: scale(.94);
 }
 
@@ -94,26 +170,31 @@ button:active {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  gap: 5px;
-  margin-top: 5px;
-  padding: 5px 3px;
-  border-radius: 8px;
-  background: rgba(0,0,0,.42);
+  gap: 6px;
+  margin-top: 7px;
+  padding: 7px 9px;
+  border: 1px solid rgba(255,255,255,.45);
+  border-radius: 20px;
+  background: rgba(0,25,10,.38);
+  backdrop-filter: blur(5px);
   font-size: clamp(10px, 2.5vw, 14px);
-  font-weight: bold;
+  font-weight: 1000;
+  text-shadow: 1px 1px 3px #000;
   white-space: nowrap;
 }
 
 #message {
+  display: none;
   position: absolute;
   z-index: 6;
   left: 50%;
   bottom: 12px;
   transform: translateX(-50%);
   max-width: 90%;
-  padding: 7px 13px;
-  border-radius: 10px;
-  background: rgba(0,0,0,.65);
+  padding: 9px 15px;
+  border: 1px solid rgba(255,255,255,.5);
+  border-radius: 20px;
+  background: rgba(0,30,10,.55);
   color: white;
   text-align: center;
   font-size: 13px;
@@ -122,9 +203,12 @@ button:active {
 }
 
 @media (orientation: portrait) {
-  h2 { font-size: 12px; }
-  button { padding: 7px 8px; min-width: 45px; }
-  #info { font-size: 10px; }
+  .home-title { font-size: 25px; }
+  .home-monkey { width: 115px; height: 130px; }
+  #homePlay { min-width: 160px; padding: 12px 25px; }
+  h2 { font-size: 11px; }
+  button { padding: 7px 8px; min-width: 43px; }
+  #info { font-size: 9px; gap: 3px; padding: 6px 3px; }
 }
 </style>
 </head>
@@ -133,12 +217,33 @@ button:active {
 
 <canvas id="game" width="900" height="450"></canvas>
 
+<!-- HOME SCREEN -->
+<div id="homeScreen">
+  <div class="home-title">SUPER MONKEY RUNNER</div>
+  <div class="home-subtitle">THE JUNGLE ADVENTURE!</div>
+
+  <img
+    class="home-monkey"
+    src="monkey.png"
+    alt="Super Monkey"
+    onerror="this.style.display='none'"
+  >
+
+  <button id="homePlay" onclick="startGame()">
+    ▶ PLAY NOW
+  </button>
+
+  <div class="home-levels">
+    🏆 200 LEVELS • RUN • JUMP • COLLECT
+  </div>
+</div>
+
+<!-- GAME HUD -->
 <div id="hud">
   <div class="toprow">
-    <h2>🐵 SUPER MONKEY RUNNER</h2>
+    <h2>🐵 SUPER MONKEY</h2>
 
     <div class="controls">
-      <button onclick="startGame()">▶ PLAY</button>
       <button onclick="togglePause()">⏸ PAUSE</button>
       <button onclick="jump()">⬆ JUMP</button>
     </div>
@@ -153,15 +258,25 @@ button:active {
   </div>
 </div>
 
-<div id="message">🐵 Welcome! Press PLAY to start!</div>
+<div id="message"></div>
 
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
+const bgImage = new Image();
+bgImage.src = "jungle-bg.png";
+let bgLoaded = false;
+
+bgImage.onload = () => {
+  bgLoaded = true;
+  draw();
+};
+
 const runImage = new Image();
 runImage.src = "monkey-run.png";
 let runLoaded = false;
+
 runImage.onload = () => {
   runLoaded = true;
   draw();
@@ -170,6 +285,7 @@ runImage.onload = () => {
 const stillImage = new Image();
 stillImage.src = "monkey.png";
 let stillLoaded = false;
+
 stillImage.onload = () => {
   stillLoaded = true;
   draw();
@@ -178,22 +294,29 @@ stillImage.onload = () => {
 let running = false;
 let paused = false;
 let gameOver = false;
+
 let level = 1;
 let score = 0;
 let coins = 0;
 let lives = 3;
 let timeLeft = 240;
+
 let lastTime = 0;
 let animationTime = 0;
 let spawnTimer = 0;
 let coinTimer = 0;
 let invulnerable = 0;
+
 let obstacles = [];
 let treasures = [];
 
 const player = {
-  x: 110, y: 300, w: 85, h: 95,
-  vy: 0, ground: true
+  x: 110,
+  y: 300,
+  w: 85,
+  h: 95,
+  vy: 0,
+  ground: true
 };
 
 const groundY = 395;
@@ -215,6 +338,7 @@ function difficulty() {
 function formatTime(t) {
   let m = Math.floor(t / 60);
   let s = Math.floor(t % 60);
+
   return String(m).padStart(2, "0") + ":" +
          String(s).padStart(2, "0");
 }
@@ -222,14 +346,24 @@ function formatTime(t) {
 function updateInfo() {
   document.getElementById("level").textContent =
     "Level: " + level + "/200";
+
   document.getElementById("score").textContent =
     "Score: " + score;
+
   document.getElementById("coins").textContent =
     "Coins: " + coins;
+
   document.getElementById("lives").textContent =
     "❤️".repeat(lives) + "🖤".repeat(3-lives);
+
   document.getElementById("timer").textContent =
     formatTime(timeLeft);
+}
+
+function showGame() {
+  document.getElementById("homeScreen").style.display = "none";
+  document.getElementById("hud").style.display = "block";
+  document.getElementById("message").style.display = "block";
 }
 
 function startGame() {
@@ -238,8 +372,10 @@ function startGame() {
   coins = 0;
   lives = 3;
   timeLeft = levelDuration(level);
+
   obstacles = [];
   treasures = [];
+
   spawnTimer = 0;
   coinTimer = 0;
   invulnerable = 0;
@@ -252,14 +388,18 @@ function startGame() {
   running = true;
   paused = false;
   gameOver = false;
+
   lastTime = 0;
   animationTime = 0;
 
+  showGame();
+
   document.getElementById("message").textContent =
-    "Run Monkey! Collect coins and bananas!";
+    "RUN MONKEY! COLLECT COINS AND BANANAS!";
 
   updateInfo();
   draw();
+
   requestAnimationFrame(loop);
 }
 
@@ -278,7 +418,7 @@ function togglePause() {
   paused = !paused;
 
   document.getElementById("message").textContent =
-    paused ? "GAME PAUSED" : "KEEP RUNNING!";
+    paused ? "⏸ GAME PAUSED" : "KEEP RUNNING!";
 
   if (!paused) {
     lastTime = 0;
@@ -298,6 +438,11 @@ document.addEventListener("keydown", e => {
 });
 
 function drawBackground() {
+  if (bgLoaded) {
+    ctx.drawImage(bgImage, 0, 0, 900, 450);
+    return;
+  }
+
   let sky = ctx.createLinearGradient(0,0,0,450);
   sky.addColorStop(0,"#54c9ff");
   sky.addColorStop(1,"#d4f6ff");
@@ -309,11 +454,6 @@ function drawBackground() {
   drawCloud(150,75);
   drawCloud(430,110);
   drawCloud(730,65);
-
-  ctx.fillStyle = "#ffd43b";
-  ctx.beginPath();
-  ctx.arc(790,90,40,0,Math.PI*2);
-  ctx.fill();
 
   ctx.fillStyle = "#60b85b";
   ctx.beginPath();
@@ -331,6 +471,7 @@ function drawBackground() {
   ctx.fillRect(0,groundY+15,900,40);
 
   ctx.fillStyle = "#f6d88a";
+
   for(let x=0;x<900;x+=80) {
     ctx.fillRect(x,groundY+25,40,5);
   }
@@ -353,55 +494,30 @@ function drawMonkey() {
     const fh=runImage.naturalHeight;
     const frame=Math.floor(animationTime/110)%4;
 
-    ctx.drawImage(runImage,frame*fw,0,fw,fh,
-      player.x,player.y,player.w,player.h);
+    ctx.drawImage(
+      runImage,
+      frame*fw,0,fw,fh,
+      player.x,player.y,player.w,player.h
+    );
   } else if(stillLoaded) {
-    ctx.drawImage(stillImage,
-      player.x,player.y,player.w,player.h);
+    ctx.drawImage(
+      stillImage,
+      player.x,player.y,player.w,player.h
+    );
   } else {
     ctx.font="75px Arial";
     ctx.fillText("🐵",player.x,player.y+75);
   }
 }
 
-function drawHomeScreen() {
-  drawBackground();
-
-  // Bandar home screen ke beech mein
-  const homeX = 405;
-  const homeY = 225;
-
-  if (stillLoaded) {
-    ctx.drawImage(stillImage, homeX, homeY, 100, 115);
-  } else if (runLoaded) {
-    const fw = runImage.naturalWidth / 4;
-    ctx.drawImage(runImage, 0, 0, fw, runImage.naturalHeight,
-      homeX, homeY, 100, 115);
-  } else {
-    ctx.font = "95px Arial";
-    ctx.fillText("🐵", homeX, homeY + 90);
-  }
-
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#fff";
-  ctx.strokeStyle = "#163b22";
-  ctx.lineWidth = 5;
-  ctx.font = "bold 43px Arial";
-  ctx.strokeText("SUPER MONKEY RUNNER", 450, 185);
-  ctx.fillText("SUPER MONKEY RUNNER", 450, 185);
-
-  ctx.font = "bold 22px Arial";
-  ctx.fillStyle = "#fff";
-  ctx.fillText("200 LEVELS • RUN • JUMP • COLLECT", 450, 385);
-  ctx.textAlign = "left";
-}
-
 function drawObstacle(o) {
   ctx.fillStyle="#995522";
   ctx.fillRect(o.x,o.y,o.w,o.h);
+
   ctx.strokeStyle="#512c12";
   ctx.lineWidth=5;
   ctx.strokeRect(o.x,o.y,o.w,o.h);
+
   ctx.beginPath();
   ctx.moveTo(o.x,o.y+o.h/2);
   ctx.lineTo(o.x+o.w,o.y+o.h/2);
@@ -419,8 +535,12 @@ function spawnObjects(dt) {
 
   if(spawnTimer>Math.max(0.75,1.7/difficulty())) {
     obstacles.push({
-      x:930,y:groundY-48,w:48,h:48
+      x:930,
+      y:groundY-48,
+      w:48,
+      h:48
     });
+
     spawnTimer=0;
   }
 
@@ -430,6 +550,7 @@ function spawnObjects(dt) {
       y:220+Math.random()*100,
       type:Math.random()<0.55?"coin":"banana"
     });
+
     coinTimer=0;
   }
 }
@@ -445,20 +566,23 @@ function nextLevel() {
   if(level>=200) {
     running=false;
     gameOver=true;
+
     document.getElementById("message").textContent =
-      "🏆 CHAMPION! You completed all 200 levels!";
+      "🏆 CHAMPION! ALL 200 LEVELS COMPLETED!";
+
     draw();
     return;
   }
 
   level++;
   timeLeft=levelDuration(level);
+
   obstacles=[];
   treasures=[];
   spawnTimer=0;
 
   document.getElementById("message").textContent =
-    "🎉 Level "+level+" started!";
+    "🎉 LEVEL "+level+" STARTED!";
 
   updateInfo();
 }
@@ -466,9 +590,14 @@ function nextLevel() {
 function endGame() {
   running=false;
   gameOver=true;
+
   document.getElementById("message").textContent =
-    "GAME OVER! Score: "+score+" | Press PLAY";
-  draw();
+    "GAME OVER! SCORE: "+score+" | PRESS PLAY NOW";
+
+  document.getElementById("hud").style.display = "none";
+  document.getElementById("homeScreen").style.display = "flex";
+
+  drawHome();
 }
 
 function update(dt) {
@@ -508,23 +637,32 @@ function update(dt) {
     if(hit(player,obstacles[i])&&invulnerable<=0) {
       lives--;
       invulnerable=1500;
+
       obstacles.splice(i,1);
 
       if(lives<=0) {
         endGame();
         return;
       }
+
       break;
     }
   }
 
   for(let i=treasures.length-1;i>=0;i--) {
     let t=treasures[i];
-    let box={x:t.x,y:t.y-25,w:30,h:30};
+
+    let box={
+      x:t.x,
+      y:t.y-25,
+      w:30,
+      h:30
+    };
 
     if(hit(player,box)) {
       if(t.type==="coin") coins++;
       else score+=50;
+
       treasures.splice(i,1);
     }
   }
@@ -532,25 +670,37 @@ function update(dt) {
   updateInfo();
 }
 
+function drawHome() {
+  drawBackground();
+}
+
 function draw() {
   if (!running && !gameOver) {
-    drawHomeScreen();
+    drawHome();
     return;
   }
 
   drawBackground();
+
   obstacles.forEach(drawObstacle);
   treasures.forEach(drawTreasure);
+
   drawMonkey();
 
   if(paused || gameOver) {
     ctx.fillStyle="rgba(0,0,0,.5)";
     ctx.fillRect(0,0,900,450);
+
     ctx.fillStyle="white";
     ctx.font="bold 48px Arial";
     ctx.textAlign="center";
-    ctx.fillText(paused?"PAUSED":
-      (level>=200?"CHAMPION!":"GAME OVER"),450,220);
+
+    ctx.fillText(
+      paused?"PAUSED":
+      (level>=200?"CHAMPION!":"GAME OVER"),
+      450,220
+    );
+
     ctx.textAlign="left";
   }
 }
@@ -561,6 +711,7 @@ function loop(timestamp) {
   if(!lastTime) lastTime=timestamp;
 
   let dt=Math.min((timestamp-lastTime)/1000,0.04);
+
   lastTime=timestamp;
 
   update(dt);
