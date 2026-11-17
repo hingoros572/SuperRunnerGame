@@ -571,7 +571,7 @@ function jump() {
   if (!running || paused || gameOver) return;
 
   if (player.ground) {
-    player.vy = -19;
+    player.vy = -22;
     player.ground = false;
     playSound("jump");
   }
@@ -872,7 +872,7 @@ function update(dt) {
   score+=Math.floor(dt*10);
 
   /* JUMP GRAVITY ADJUSTMENT */
-  player.vy+=0.72;
+  player.vy+=0.58;
   player.y+=player.vy;
 
   if(player.y+player.h>=groundY) {
