@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -275,6 +276,177 @@ html, body {
   margin: 5px auto 20px;
 }
 
+/* GOLDEN LEVEL COMPLETE CARD */
+
+#levelCompleteScreen {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: rgba(0, 20, 5, .78);
+  overflow: hidden;
+}
+
+.complete-card {
+  width: min(92vw, 650px);
+  max-height: 95%;
+  overflow-y: auto;
+  text-align: center;
+  padding: 18px 16px 20px;
+  border: 5px solid #ffe76b;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top, #fff6a8, transparent 45%),
+    linear-gradient(145deg, #ffdf42, #f59a00 65%, #a84b00);
+  box-shadow:
+    0 0 0 5px #9b4b00,
+    0 0 30px #ffdf42,
+    inset 0 0 18px rgba(255,255,255,.65);
+  color: #5a2600;
+}
+
+.complete-brand {
+  color: #fff8b0;
+  font-size: clamp(15px, 3vw, 23px);
+  font-weight: 1000;
+  text-shadow: 2px 3px 3px #713400;
+}
+
+.complete-title {
+  margin: 8px 0;
+  padding: 10px 5px;
+  border: 3px solid #ffed72;
+  border-radius: 18px;
+  background: linear-gradient(#f44316, #a90000);
+  color: #fff13b;
+  font-size: clamp(25px, 6vw, 48px);
+  font-weight: 1000;
+  text-shadow: 3px 4px 2px #6b1600;
+}
+
+.complete-monkey {
+  font-size: clamp(48px, 10vw, 78px);
+  line-height: 1.1;
+  margin: 5px;
+  filter: drop-shadow(0 5px 3px rgba(0,0,0,.3));
+}
+
+.complete-stars {
+  color: #fff600;
+  font-size: clamp(35px, 8vw, 58px);
+  letter-spacing: 5px;
+  text-shadow: 2px 4px 2px #a34a00;
+  margin: 5px;
+}
+
+.complete-level {
+  background: #713300;
+  color: white;
+  border: 2px solid #ffdc54;
+  border-radius: 16px;
+  padding: 10px;
+  margin: 10px auto;
+  max-width: 430px;
+  font-size: clamp(19px, 4vw, 30px);
+  font-weight: 1000;
+}
+
+.complete-unlocked {
+  color: #075b0b;
+  font-size: clamp(17px, 3.5vw, 25px);
+  font-weight: 1000;
+  margin: 12px 0;
+  text-shadow: 1px 1px white;
+}
+
+#nextLevelButton {
+  width: min(90%, 390px);
+  padding: 15px 10px;
+  border: 4px solid white;
+  border-radius: 50px;
+  background: linear-gradient(#fff66b, #ff9e00);
+  color: #5a2900;
+  font-size: clamp(20px, 4vw, 30px);
+  font-weight: 1000;
+  box-shadow: 0 7px 0 #a94e08, 0 10px 15px rgba(0,0,0,.3);
+  margin-top: 10px;
+}
+
+#nextLevelButton:active {
+  transform: translateY(5px);
+  box-shadow: 0 2px 0 #a94e08;
+}
+
+.final-champion {
+  color: #fff000;
+  font-size: clamp(28px, 6vw, 52px);
+  font-weight: 1000;
+  text-shadow: 3px 4px 3px #8a2500;
+}
+
+.final-message {
+  color: #5b2600;
+  background: #fff0b0;
+  border: 3px solid #fff;
+  border-radius: 15px;
+  padding: 12px;
+  font-size: clamp(17px, 3.5vw, 25px);
+  font-weight: 1000;
+  margin: 12px auto;
+}
+
+@media (orientation: portrait) {
+  .home-title { font-size: 25px; }
+  .home-monkey { width: 115px; height: 130px; }
+  #homePlay { min-width: 160px; padding: 12px 25px; }
+  h2 { font-size: 11px; }
+  .game-btn { padding: 7px 8px; min-width: 43px; }
+  #info { font-size: 9px; gap: 3px; padding: 6px 3px; }
+  .sound-btn { top: 8px; right: 8px; }
+  .level-grid { gap: 9px 5px; }
+}
+
+@media (min-width: 600px) {
+  .level-grid {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 14px 10px;
+  }
+}
+
+@media (orientation: landscape) {
+  .complete-card {
+    width: min(75vw, 650px);
+    padding: 10px 18px;
+  }
+
+  .complete-monkey {
+    font-size: 48px;
+    margin: 0;
+  }
+
+  .complete-stars {
+    font-size: 38px;
+    margin: 0;
+  }
+
+  .complete-title {
+    margin: 5px 0;
+  }
+
+  .complete-level {
+    margin: 6px auto;
+    padding: 6px;
+  }
+
+  #nextLevelButton {
+    padding: 10px;
+    margin-top: 5px;
+  }
+}
+
 /* GAME HUD */
 
 #hud {
@@ -366,24 +538,6 @@ h2 {
   font-weight: bold;
   pointer-events: none;
 }
-
-@media (orientation: portrait) {
-  .home-title { font-size: 25px; }
-  .home-monkey { width: 115px; height: 130px; }
-  #homePlay { min-width: 160px; padding: 12px 25px; }
-  h2 { font-size: 11px; }
-  .game-btn { padding: 7px 8px; min-width: 43px; }
-  #info { font-size: 9px; gap: 3px; padding: 6px 3px; }
-  .sound-btn { top: 8px; right: 8px; }
-  .level-grid { gap: 9px 5px; }
-}
-
-@media (min-width: 600px) {
-  .level-grid {
-    grid-template-columns: repeat(8, minmax(0, 1fr));
-    gap: 14px 10px;
-  }
-}
 </style>
 </head>
 
@@ -463,6 +617,46 @@ h2 {
 </div>
 
 <div id="message"></div>
+
+<!-- GOLDEN LEVEL COMPLETE CARD -->
+<div id="levelCompleteScreen">
+  <div class="complete-card">
+
+    <div class="complete-brand">
+      SUPER MONKEY RUNNER
+    </div>
+
+    <div class="complete-title" id="completeTitle">
+      LEVEL COMPLETE!
+    </div>
+
+    <div class="complete-monkey" id="completeMonkey">
+      🐵🎉
+    </div>
+
+    <div class="complete-stars">
+      ★★★
+    </div>
+
+    <div class="complete-level" id="completeLevelText">
+      LEVEL 1 COMPLETE
+    </div>
+
+    <div class="complete-unlocked" id="completeUnlocked">
+      🔓 LEVEL 2 UNLOCKED!
+    </div>
+
+    <div id="finalMessage" class="final-message"
+         style="display:none">
+      YOU ARE THE SUPER MONKEY CHAMPION! 🏆
+    </div>
+
+    <button id="nextLevelButton" onclick="continueAfterCard()">
+      ▶ NEXT LEVEL
+    </button>
+
+  </div>
+</div>
 
 <script>
 const canvas = document.getElementById("game");
@@ -823,6 +1017,7 @@ function showGame() {
   document.getElementById("homeScreen").style.display = "none";
   document.getElementById("levelScreen").style.display = "none";
   document.getElementById("homeSound").style.display = "none";
+  document.getElementById("levelCompleteScreen").style.display = "none";
   document.getElementById("hud").style.display = "block";
   document.getElementById("message").style.display = "block";
 }
@@ -1106,51 +1301,135 @@ function hit(a,b) {
     a.y+a.h-10>b.y;
 }
 
+/* LEVEL COMPLETE CARD SYSTEM */
+
 function nextLevel() {
 
   /* CURRENT LEVEL SUCCESS AND SAVE */
 
   completeLevel(level);
 
-  if(level>=200) {
-    running=false;
-    gameOver=true;
+  running = false;
+  paused = false;
 
-    victoryActive=true;
-    invulnerable=0;
+  const screen = document.getElementById("levelCompleteScreen");
+  const title = document.getElementById("completeTitle");
+  const levelText = document.getElementById("completeLevelText");
+  const unlocked = document.getElementById("completeUnlocked");
+  const button = document.getElementById("nextLevelButton");
+  const finalMessage = document.getElementById("finalMessage");
+  const monkey = document.getElementById("completeMonkey");
 
-    player.y=groundY-player.h;
-    player.vy=0;
-    player.ground=true;
+  playSound("level");
 
-    playSound("level");
+  if(level >= 200) {
 
-    document.getElementById("message").textContent =
-      "🏆 CHAMPION! ALL 200 LEVELS COMPLETED!";
+    /* FINAL CHAMPION CARD */
 
-    draw();
+    victoryActive = true;
+    gameOver = true;
 
+    player.y = groundY-player.h;
+    player.vy = 0;
+    player.ground = true;
+
+    title.textContent = "FINAL CHAMPION!";
+    monkey.textContent = "👑🐵🏆";
+    levelText.textContent = "ALL 200 LEVELS COMPLETED!";
+    unlocked.style.display = "none";
+
+    finalMessage.style.display = "block";
+    button.textContent = "🏆 BACK TO LEVELS";
+
+    screen.style.display = "flex";
+
+    animationTime = 0;
     requestAnimationFrame(victoryLoop);
+
     return;
   }
+
+  /* NORMAL LEVEL COMPLETE CARD */
+
+  victoryActive = false;
+  gameOver = false;
+
+  title.textContent = "LEVEL COMPLETE!";
+  monkey.textContent = "🐵🎉";
+
+  levelText.textContent =
+    "LEVEL " + level + " COMPLETE";
+
+  unlocked.style.display = "block";
+  unlocked.textContent =
+    "🔓 LEVEL " + (level + 1) + " UNLOCKED!";
+
+  finalMessage.style.display = "none";
+  button.textContent = "▶ NEXT LEVEL";
+
+  screen.style.display = "flex";
+}
+
+/* NEXT LEVEL BUTTON */
+
+function continueAfterCard() {
+
+  const screen = document.getElementById("levelCompleteScreen");
+
+  /* FINAL LEVEL BUTTON */
+
+  if(level >= 200) {
+
+    screen.style.display = "none";
+
+    victoryActive = false;
+    gameOver = false;
+    running = false;
+
+    document.getElementById("hud").style.display = "none";
+    document.getElementById("message").style.display = "none";
+
+    openLevelSelect();
+    return;
+  }
+
+  screen.style.display = "none";
+
+  /* START NEXT LEVEL */
 
   level++;
 
   /* EVERY NEW LEVEL STARTS WITH FULL 3 HEARTS */
   lives = 3;
 
-  timeLeft=levelDuration(level);
+  timeLeft = levelDuration(level);
 
-  obstacles=[];
-  treasures=[];
-  spawnTimer=0;
+  obstacles = [];
+  treasures = [];
 
-  playSound("level");
+  spawnTimer = 0;
+  coinTimer = 0;
+  invulnerable = 0;
+
+  player.x = 110;
+  player.y = groundY - player.h;
+  player.vy = 0;
+  player.ground = true;
+
+  running = true;
+  paused = false;
+  gameOver = false;
+  victoryActive = false;
+
+  lastTime = 0;
 
   document.getElementById("message").textContent =
-    "🎉 LEVEL "+level+" STARTED! ❤️❤️❤️";
+    "🎉 LEVEL " + level + " STARTED! ❤️❤️❤️";
 
   updateInfo();
+  draw();
+
+  requestAnimationFrame(loop);
 }
 
 function endGame() {
