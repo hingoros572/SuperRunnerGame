@@ -401,6 +401,21 @@ stillImage.onload = () => {
   draw();
 };
 
+/* NEW LEVEL BACKGROUND IMAGES */
+
+const levelBackgrounds = [];
+
+for (let i = 1; i <= 8; i++) {
+  const image = new Image();
+  image.src = "bg" + i + ".png";
+
+  image.onload = () => {
+    draw();
+  };
+
+  levelBackgrounds.push(image);
+}
+
 /* NEW VICTORY ANIMATION IMAGE */
 
 const victoryImage = new Image();
@@ -426,6 +441,9 @@ let score = 0;
 let coins = 0;
 let lives = 3;
 let timeLeft = 240;
+
+/* NEW BANANA HEALTH COUNTER */
+let bananasCollected = 0;
 
 let lastTime = 0;
 let animationTime = 0;
@@ -508,6 +526,9 @@ function startGame() {
   lives = 3;
   timeLeft = levelDuration(level);
 
+  /* RESET BANANA COUNTER */
+  bananasCollected = 0;
+
   obstacles = [];
   treasures = [];
 
@@ -574,6 +595,24 @@ document.addEventListener("keydown", e => {
 });
 
 function drawBackground() {
+
+  /* SELECT BACKGROUND FOR CURRENT LEVEL */
+  let selectedBackground = null;
+
+  if (running || victoryActive) {
+    const backgroundIndex = Math.floor((level - 1) / 25);
+    selectedBackground = levelBackgrounds[backgroundIndex];
+  }
+
+  /* DRAW LEVEL BACKGROUND IF LOADED */
+  if (selectedBackground && selectedBackground.complete &&
+      selectedBackground.naturalWidth > 0) {
+
+    ctx.drawImage(selectedBackground, 0, 0, 900, 450);
+    return;
+  }
+
+  /* ORIGINAL JUNGLE BACKGROUND FALLBACK */
   if (bgLoaded) {
     ctx.drawImage(bgImage, 0, 0, 900, 450);
     return;
@@ -873,6 +912,15 @@ function update(dt) {
       } else {
         score+=50;
         playSound("coin");
+
+        /* NEW: EVERY 10 BANANAS GIVE 1 HEALTH */
+        bananasCollected++;
+
+        if(bananasCollected % 10 === 0 && lives < 3) {
+          lives++;
+          document.getElementById("message").textContent =
+            "❤️ 10 BANANAS! EXTRA HEALTH!";
+        }
       }
 
       treasures.splice(i,1);
