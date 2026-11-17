@@ -401,7 +401,7 @@ stillImage.onload = () => {
   draw();
 };
 
-/* NEW LEVEL BACKGROUND IMAGES */
+/* LEVEL BACKGROUND IMAGES */
 
 const levelBackgrounds = [];
 
@@ -416,7 +416,7 @@ for (let i = 1; i <= 8; i++) {
   levelBackgrounds.push(image);
 }
 
-/* NEW VICTORY ANIMATION IMAGE */
+/* VICTORY ANIMATION IMAGE */
 
 const victoryImage = new Image();
 victoryImage.src = "victory.png";
@@ -433,7 +433,7 @@ let running = false;
 let paused = false;
 let gameOver = false;
 
-/* NEW VICTORY STATE */
+/* VICTORY STATE */
 let victoryActive = false;
 
 let level = 1;
@@ -442,7 +442,7 @@ let coins = 0;
 let lives = 3;
 let timeLeft = 240;
 
-/* NEW BANANA HEALTH COUNTER */
+/* BANANA HEALTH COUNTER */
 let bananasCollected = 0;
 
 let lastTime = 0;
@@ -474,11 +474,17 @@ function levelDuration(n) {
   return 480;
 }
 
+/* UPDATED SPEED: INCREASES EVERY 25 LEVELS */
+
 function difficulty() {
-  if (level <= 50) return 1;
-  if (level <= 100) return 1.3;
-  if (level <= 150) return 1.6;
-  return 1.9;
+  if (level <= 25) return 0.75;
+  if (level <= 50) return 0.90;
+  if (level <= 75) return 1.05;
+  if (level <= 100) return 1.20;
+  if (level <= 125) return 1.35;
+  if (level <= 150) return 1.50;
+  if (level <= 175) return 1.70;
+  return 1.90;
 }
 
 function formatTime(t) {
@@ -563,7 +569,8 @@ function jump() {
   if (!running || paused || gameOver) return;
 
   if (player.ground) {
-    player.vy = -15;
+    /* STRONGER JUMP */
+    player.vy = -17.5;
     player.ground = false;
     playSound("jump");
   }
@@ -695,7 +702,7 @@ function drawMonkeyShadow() {
 
 function drawMonkey() {
 
-  /* NEW VICTORY SPRITE ANIMATION */
+  /* VICTORY SPRITE ANIMATION */
   if (victoryActive && victoryLoaded) {
     const fw = victoryImage.naturalWidth / 4;
     const fh = victoryImage.naturalHeight;
@@ -913,7 +920,7 @@ function update(dt) {
         score+=50;
         playSound("coin");
 
-        /* NEW: EVERY 10 BANANAS GIVE 1 HEALTH */
+        /* EVERY 10 BANANAS GIVE 1 HEALTH */
         bananasCollected++;
 
         if(bananasCollected % 10 === 0 && lives < 3) {
@@ -966,7 +973,7 @@ function draw() {
   }
 }
 
-/* NEW VICTORY ANIMATION LOOP */
+/* VICTORY ANIMATION LOOP */
 
 function victoryLoop() {
   if (!victoryActive) return;
