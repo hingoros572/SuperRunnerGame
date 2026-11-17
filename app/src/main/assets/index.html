@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#54c9ff">
+<meta name="theme-color" content="#168b38">
 <title>Super Monkey Runner</title>
 
 <style>
@@ -12,6 +12,7 @@
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
 }
+
 html, body {
   margin: 0;
   padding: 0;
@@ -19,96 +20,209 @@ html, body {
   height: 100%;
   height: 100dvh;
   overflow: hidden;
-  background: #54c9ff;
+  background: #168b38;
   font-family: Arial, sans-serif;
+  touch-action: manipulation;
 }
+
 #game {
   position: absolute;
   inset: 0;
-  display: block;
-  width: 100vw;
+  width: 100%;
   height: 100%;
-  border: 0;
+  display: block;
   touch-action: manipulation;
 }
+
+/* HOME SCREEN */
+
+#homeScreen {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  background:
+    linear-gradient(rgba(0,30,10,.12),rgba(0,30,10,.25)),
+    url("jungle-bg.png") center center / 100% 100% no-repeat;
+}
+
+.home-title {
+  color: #fff;
+  font-size: clamp(25px, 5vw, 52px);
+  font-weight: 1000;
+  letter-spacing: 1px;
+  text-shadow: 3px 4px 0 #174b1c, 0 0 15px #174b1c;
+  margin-bottom: 5px;
+}
+
+.home-subtitle {
+  color: #fff6b0;
+  font-size: clamp(13px, 2.5vw, 22px);
+  font-weight: 900;
+  text-shadow: 2px 3px 4px #174b1c;
+}
+
+.home-monkey {
+  width: clamp(110px, 23vw, 190px);
+  height: clamp(120px, 27vw, 210px);
+  object-fit: contain;
+  filter: drop-shadow(0 9px 8px rgba(0,0,0,.4));
+  animation: monkeyBounce 1.4s infinite ease-in-out;
+}
+
+@keyframes monkeyBounce {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+#homePlay {
+  min-width: 190px;
+  padding: 15px 35px;
+  border: 3px solid white;
+  border-radius: 50px;
+  background: linear-gradient(180deg,#fff16a,#ffad16);
+  color: #613000;
+  font-size: 23px;
+  font-weight: 1000;
+  box-shadow: 0 7px 0 #a94e08, 0 10px 20px rgba(0,0,0,.3);
+  margin-top: 12px;
+}
+
+#homePlay:active {
+  transform: translateY(5px);
+}
+
+.home-levels {
+  color: white;
+  font-size: clamp(11px, 2vw, 17px);
+  font-weight: 900;
+  text-shadow: 2px 2px 4px #17451c;
+  margin-top: 18px;
+}
+
+/* SOUND BUTTON */
+
+.sound-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 20;
+  min-width: 105px;
+  padding: 9px 12px;
+  border: 2px solid white;
+  border-radius: 30px;
+  background: rgba(0,35,10,.65);
+  color: white;
+  font-size: 12px;
+  font-weight: 900;
+  box-shadow: 0 3px 10px rgba(0,0,0,.25);
+}
+
+/* GAME HUD */
+
 #hud {
+  display: none;
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   z-index: 5;
-  padding: 5px 7px;
-  background: linear-gradient(to bottom,rgba(8,22,39,.88),rgba(8,22,39,.55));
+  padding: 7px 9px;
   color: white;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,35,15,.35),
+    rgba(0,35,15,0)
+  );
 }
+
 .toprow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 5px;
+  gap: 6px;
 }
+
 h2 {
   margin: 0;
-  font-size: clamp(12px, 3vw, 19px);
-  font-weight: 900;
+  font-size: clamp(12px, 2.7vw, 19px);
+  font-weight: 1000;
+  text-shadow: 2px 2px 4px #000;
   white-space: nowrap;
-  text-shadow: 2px 2px 3px #000;
 }
+
 .controls {
   display: flex;
-  gap: 5px;
   align-items: center;
+  gap: 6px;
 }
-button {
-  border: 2px solid rgba(255,255,255,.7);
-  border-radius: 9px;
-  padding: 8px 10px;
-  min-width: 48px;
-  background: #ffc928;
-  color: #18202b;
+
+.game-btn {
+  border: 2px solid rgba(255,255,255,.9);
+  border-radius: 12px;
+  padding: 8px 12px;
+  min-width: 55px;
+  background: linear-gradient(#ffe96a,#ffad18);
+  color: #422500;
   font-size: clamp(10px, 2.5vw, 14px);
-  font-weight: 900;
+  font-weight: 1000;
   white-space: nowrap;
   touch-action: manipulation;
 }
-button:active {
-  background: #ff941c;
+
+.game-btn:active {
   transform: scale(.94);
 }
+
 #info {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  gap: 5px;
-  margin-top: 5px;
-  padding: 5px 3px;
-  border-radius: 8px;
-  background: rgba(0,0,0,.42);
+  gap: 6px;
+  margin-top: 7px;
+  padding: 7px 9px;
+  border: 1px solid rgba(255,255,255,.45);
+  border-radius: 20px;
+  background: rgba(0,25,10,.38);
+  backdrop-filter: blur(5px);
   font-size: clamp(10px, 2.5vw, 14px);
-  font-weight: bold;
+  font-weight: 1000;
+  text-shadow: 1px 1px 3px #000;
   white-space: nowrap;
 }
+
 #message {
+  display: none;
   position: absolute;
   z-index: 6;
   left: 50%;
   bottom: 12px;
   transform: translateX(-50%);
   max-width: 90%;
-  padding: 7px 13px;
-  border-radius: 10px;
-  background: rgba(0,0,0,.65);
+  padding: 9px 15px;
+  border: 1px solid rgba(255,255,255,.5);
+  border-radius: 20px;
+  background: rgba(0,30,10,.55);
   color: white;
   text-align: center;
   font-size: 13px;
   font-weight: bold;
   pointer-events: none;
 }
+
 @media (orientation: portrait) {
+  .home-title { font-size: 25px; }
+  .home-monkey { width: 115px; height: 130px; }
+  #homePlay { min-width: 160px; padding: 12px 25px; }
   h2 { font-size: 11px; }
-  button { padding: 6px 6px; min-width: 39px; }
-  #info { font-size: 9px; }
-  .controls { gap: 3px; }
+  .game-btn { padding: 7px 8px; min-width: 43px; }
+  #info { font-size: 9px; gap: 3px; padding: 6px 3px; }
+  .sound-btn { top: 8px; right: 8px; }
 }
 </style>
 </head>
@@ -117,14 +231,43 @@ button:active {
 
 <canvas id="game" width="900" height="450"></canvas>
 
+<!-- HOME SCREEN -->
+<div id="homeScreen">
+  <div class="home-title">SUPER MONKEY RUNNER</div>
+  <div class="home-subtitle">THE JUNGLE ADVENTURE!</div>
+
+  <img
+    class="home-monkey"
+    src="monkey.png"
+    alt="Super Monkey"
+    onerror="this.style.display='none'"
+  >
+
+  <button id="homePlay" onclick="startGame()">
+    ▶ PLAY NOW
+  </button>
+
+  <div class="home-levels">
+    🏆 200 LEVELS • RUN • JUMP • COLLECT
+  </div>
+</div>
+
+<!-- HOME SOUND BUTTON -->
+<button class="sound-btn" id="homeSound" onclick="toggleSound()">
+  🔊 SOUND ON
+</button>
+
+<!-- GAME HUD -->
 <div id="hud">
   <div class="toprow">
-    <h2>🐵 SUPER MONKEY RUNNER</h2>
+    <h2>🐵 SUPER MONKEY</h2>
+
     <div class="controls">
-      <button onclick="startGame()">▶ PLAY</button>
-      <button onclick="togglePause()">⏸ PAUSE</button>
-      <button onclick="jump()">⬆ JUMP</button>
-      <button id="soundBtn" onclick="toggleSound()">🔊</button>
+      <button class="game-btn" onclick="togglePause()">⏸ PAUSE</button>
+      <button class="game-btn" onclick="jump()">⬆ JUMP</button>
+      <button class="game-btn" onclick="toggleSound()" id="gameSound">
+        🔊 SOUND
+      </button>
     </div>
   </div>
 
@@ -137,15 +280,113 @@ button:active {
   </div>
 </div>
 
-<div id="message">🐵 Welcome! Press PLAY to start!</div>
+<div id="message"></div>
 
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
+/* SOUND SYSTEM */
+
+let soundEnabled = true;
+let audioContext = null;
+
+function unlockAudio() {
+  try {
+    if (!audioContext) {
+      const AudioClass =
+        window.AudioContext || window.webkitAudioContext;
+
+      if (AudioClass) {
+        audioContext = new AudioClass();
+      }
+    }
+
+    if (audioContext && audioContext.state === "suspended") {
+      audioContext.resume();
+    }
+  } catch (e) {}
+}
+
+function playSound(type) {
+  if (!soundEnabled) return;
+
+  try {
+    unlockAudio();
+
+    if (!audioContext) return;
+
+    const sounds = {
+      play:  [450, 750, 0.20],
+      jump:  [300, 650, 0.15],
+      coin:  [850, 1250, 0.12],
+      hit:   [180, 75, 0.25],
+      level: [500, 950, 0.30],
+      over:  [350, 90, 0.40]
+    };
+
+    const data = sounds[type] || sounds.play;
+    const now = audioContext.currentTime;
+
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(data[0], now);
+    oscillator.frequency.exponentialRampToValueAtTime(
+      Math.max(1, data[1]), now + data[2]
+    );
+
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.18, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(
+      0.001, now + data[2] + 0.05
+    );
+
+    oscillator.start(now);
+    oscillator.stop(now + data[2] + 0.06);
+
+  } catch (e) {
+    console.log("Sound unavailable");
+  }
+}
+
+function updateSoundButtons() {
+  const label = soundEnabled ? "🔊 SOUND ON" : "🔇 SOUND OFF";
+
+  document.getElementById("homeSound").textContent = label;
+  document.getElementById("gameSound").textContent =
+    soundEnabled ? "🔊 SOUND" : "🔇 MUTED";
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  updateSoundButtons();
+
+  if (soundEnabled) {
+    unlockAudio();
+    playSound("play");
+  }
+}
+
+/* GAME IMAGES */
+
+const bgImage = new Image();
+bgImage.src = "jungle-bg.png";
+let bgLoaded = false;
+
+bgImage.onload = () => {
+  bgLoaded = true;
+  draw();
+};
+
 const runImage = new Image();
 runImage.src = "monkey-run.png";
 let runLoaded = false;
+
 runImage.onload = () => {
   runLoaded = true;
   draw();
@@ -154,10 +395,13 @@ runImage.onload = () => {
 const stillImage = new Image();
 stillImage.src = "monkey.png";
 let stillLoaded = false;
+
 stillImage.onload = () => {
   stillLoaded = true;
   draw();
 };
+
+/* GAME VARIABLES */
 
 let running = false;
 let paused = false;
@@ -178,77 +422,19 @@ let invulnerable = 0;
 let obstacles = [];
 let treasures = [];
 
-const groundY = 395;
+/* BIGGER GAMEPLAY MONKEY */
 
-/* BIGGER MONKEY */
 const player = {
-  x: 105,
-  y: groundY - 140,
+  x: 110,
+  y: 255,
   w: 125,
   h: 140,
   vy: 0,
   ground: true
 };
 
-/* SOUND SYSTEM */
-let soundEnabled = true;
-let audioCtx = null;
+const groundY = 395;
 
-function playSound(type) {
-  if (!soundEnabled) return;
-
-  try {
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-
-    if (audioCtx.state === "suspended") {
-      audioCtx.resume();
-    }
-
-    const sounds = {
-      jump: [420, 650, 0.13],
-      coin: [850, 1150, 0.12],
-      hit: [180, 90, 0.22],
-      level: [550, 950, 0.3],
-      over: [300, 100, 0.45],
-      play: [500, 700, 0.12]
-    };
-
-    const data = sounds[type];
-    if (!data) return;
-
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(data[0], audioCtx.currentTime);
-    osc.frequency.linearRampToValueAtTime(
-      data[1], audioCtx.currentTime + data[2]
-    );
-
-    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(
-      0.001, audioCtx.currentTime + data[2]
-    );
-
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-
-    osc.start();
-    osc.stop(audioCtx.currentTime + data[2]);
-  } catch (e) {}
-}
-
-function toggleSound() {
-  soundEnabled = !soundEnabled;
-  document.getElementById("soundBtn").textContent =
-    soundEnabled ? "🔊" : "🔇";
-
-  if (soundEnabled) playSound("play");
-}
-
-/* LEVEL SETTINGS */
 function levelDuration(n) {
   if (n <= 50) return 240;
   if (n <= 100) return 300;
@@ -266,6 +452,7 @@ function difficulty() {
 function formatTime(t) {
   let m = Math.floor(t / 60);
   let s = Math.floor(t % 60);
+
   return String(m).padStart(2, "0") + ":" +
          String(s).padStart(2, "0");
 }
@@ -287,8 +474,17 @@ function updateInfo() {
     formatTime(timeLeft);
 }
 
-/* START GAME */
+function showGame() {
+  document.getElementById("homeScreen").style.display = "none";
+  document.getElementById("homeSound").style.display = "none";
+  document.getElementById("hud").style.display = "block";
+  document.getElementById("message").style.display = "block";
+}
+
 function startGame() {
+  unlockAudio();
+  playSound("play");
+
   level = 1;
   score = 0;
   coins = 0;
@@ -302,7 +498,7 @@ function startGame() {
   coinTimer = 0;
   invulnerable = 0;
 
-  player.x = 105;
+  player.x = 110;
   player.y = groundY - player.h;
   player.vy = 0;
   player.ground = true;
@@ -314,17 +510,17 @@ function startGame() {
   lastTime = 0;
   animationTime = 0;
 
+  showGame();
+
   document.getElementById("message").textContent =
-    "Run Monkey! Collect coins and bananas!";
+    "RUN MONKEY! COLLECT COINS AND BANANAS!";
 
   updateInfo();
-  playSound("play");
   draw();
 
   requestAnimationFrame(loop);
 }
 
-/* JUMP */
 function jump() {
   if (!running || paused || gameOver) return;
 
@@ -335,14 +531,13 @@ function jump() {
   }
 }
 
-/* PAUSE */
 function togglePause() {
   if (!running || gameOver) return;
 
   paused = !paused;
 
   document.getElementById("message").textContent =
-    paused ? "GAME PAUSED" : "KEEP RUNNING!";
+    paused ? "⏸ GAME PAUSED" : "KEEP RUNNING!";
 
   if (!paused) {
     lastTime = 0;
@@ -361,8 +556,12 @@ document.addEventListener("keydown", e => {
   }
 });
 
-/* BACKGROUND */
 function drawBackground() {
+  if (bgLoaded) {
+    ctx.drawImage(bgImage, 0, 0, 900, 450);
+    return;
+  }
+
   let sky = ctx.createLinearGradient(0,0,0,450);
   sky.addColorStop(0,"#54c9ff");
   sky.addColorStop(1,"#d4f6ff");
@@ -374,11 +573,6 @@ function drawBackground() {
   drawCloud(150,75);
   drawCloud(430,110);
   drawCloud(730,65);
-
-  ctx.fillStyle = "#ffd43b";
-  ctx.beginPath();
-  ctx.arc(790,90,40,0,Math.PI*2);
-  ctx.fill();
 
   ctx.fillStyle = "#60b85b";
   ctx.beginPath();
@@ -396,6 +590,7 @@ function drawBackground() {
   ctx.fillRect(0,groundY+15,900,40);
 
   ctx.fillStyle = "#f6d88a";
+
   for(let x=0;x<900;x+=80) {
     ctx.fillRect(x,groundY+25,40,5);
   }
@@ -409,99 +604,70 @@ function drawCloud(x,y) {
   ctx.fill();
 }
 
-/* MONKEY GROUND SHADOW */
+/* JUMPING SHADOW */
+
 function drawMonkeyShadow() {
-  let heightAboveGround =
+  const heightAboveGround =
     Math.max(0, groundY - (player.y + player.h));
 
-  let shadowWidth = Math.max(45, 100 - heightAboveGround * 0.22);
-  let shadowOpacity = Math.max(0.12, 0.35 - heightAboveGround * 0.001);
+  const shadowWidth =
+    Math.max(30, 100 - heightAboveGround * 0.25);
+
+  const shadowOpacity =
+    Math.max(0.10, 0.35 - heightAboveGround * 0.001);
 
   ctx.save();
-  ctx.fillStyle = "rgba(0,0,0," + shadowOpacity + ")";
+
+  ctx.fillStyle =
+    "rgba(0,0,0," + shadowOpacity + ")";
+
   ctx.beginPath();
+
   ctx.ellipse(
     player.x + player.w / 2,
     groundY + 5,
     shadowWidth / 2,
-    9,
-    0, 0, Math.PI * 2
+    8,
+    0,
+    0,
+    Math.PI * 2
   );
+
   ctx.fill();
   ctx.restore();
 }
 
-/* CLEAR BIG MONKEY */
 function drawMonkey() {
-  if(invulnerable > 0 &&
-     Math.floor(animationTime / 70) % 2 === 0) return;
+  if(invulnerable>0 &&
+     Math.floor(animationTime/70)%2===0) return;
 
   if(runLoaded) {
-    const fw = runImage.naturalWidth / 4;
-    const fh = runImage.naturalHeight;
-    const frame = Math.floor(animationTime / 110) % 4;
+    const fw=runImage.naturalWidth/4;
+    const fh=runImage.naturalHeight;
+    const frame=Math.floor(animationTime/110)%4;
 
     ctx.drawImage(
       runImage,
-      frame * fw, 0, fw, fh,
-      player.x, player.y, player.w, player.h
+      frame*fw,0,fw,fh,
+      player.x,player.y,player.w,player.h
     );
-
   } else if(stillLoaded) {
     ctx.drawImage(
       stillImage,
-      player.x, player.y, player.w, player.h
+      player.x,player.y,player.w,player.h
     );
-
   } else {
-    ctx.font = "110px Arial";
-    ctx.fillText("🐵", player.x, player.y + 115);
+    ctx.font="100px Arial";
+    ctx.fillText("🐵",player.x,player.y+105);
   }
 }
 
-/* HOME SCREEN */
-function drawHomeScreen() {
-  drawBackground();
-
-  const homeX = 405;
-  const homeY = 225;
-
-  if (stillLoaded) {
-    ctx.drawImage(stillImage, homeX, homeY, 100, 115);
-  } else if (runLoaded) {
-    const fw = runImage.naturalWidth / 4;
-    ctx.drawImage(
-      runImage, 0, 0, fw, runImage.naturalHeight,
-      homeX, homeY, 100, 115
-    );
-  } else {
-    ctx.font = "95px Arial";
-    ctx.fillText("🐵", homeX, homeY + 90);
-  }
-
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#fff";
-  ctx.strokeStyle = "#163b22";
-  ctx.lineWidth = 5;
-  ctx.font = "bold 43px Arial";
-
-  ctx.strokeText("SUPER MONKEY RUNNER", 450, 185);
-  ctx.fillText("SUPER MONKEY RUNNER", 450, 185);
-
-  ctx.font = "bold 22px Arial";
-  ctx.fillStyle = "#fff";
-  ctx.fillText("200 LEVELS • RUN • JUMP • COLLECT", 450, 385);
-
-  ctx.textAlign = "left";
-}
-
-/* OBSTACLES */
 function drawObstacle(o) {
-  ctx.fillStyle = "#995522";
+  ctx.fillStyle="#995522";
   ctx.fillRect(o.x,o.y,o.w,o.h);
 
-  ctx.strokeStyle = "#512c12";
-  ctx.lineWidth = 5;
+  ctx.strokeStyle="#512c12";
+  ctx.lineWidth=5;
   ctx.strokeRect(o.x,o.y,o.w,o.h);
 
   ctx.beginPath();
@@ -510,138 +676,143 @@ function drawObstacle(o) {
   ctx.stroke();
 }
 
-/* COINS AND BANANAS */
 function drawTreasure(t) {
-  ctx.font = "30px Arial";
-  ctx.fillText(t.type === "coin" ? "🪙" : "🍌",t.x,t.y);
+  ctx.font="30px Arial";
+  ctx.fillText(t.type==="coin"?"🪙":"🍌",t.x,t.y);
 }
 
-/* SPAWN */
 function spawnObjects(dt) {
-  spawnTimer += dt;
-  coinTimer += dt;
+  spawnTimer+=dt;
+  coinTimer+=dt;
 
-  if(spawnTimer > Math.max(0.75,1.7/difficulty())) {
+  if(spawnTimer>Math.max(0.75,1.7/difficulty())) {
     obstacles.push({
       x:930,
       y:groundY-48,
       w:48,
       h:48
     });
-    spawnTimer = 0;
+
+    spawnTimer=0;
   }
 
-  if(coinTimer > 1.15) {
+  if(coinTimer>1.15) {
     treasures.push({
       x:930,
       y:220+Math.random()*100,
-      type:Math.random()<0.55 ? "coin" : "banana"
+      type:Math.random()<0.55?"coin":"banana"
     });
-    coinTimer = 0;
+
+    coinTimer=0;
   }
 }
 
-/* COLLISION */
 function hit(a,b) {
-  return a.x+22 < b.x+b.w &&
-    a.x+a.w-22 > b.x &&
-    a.y+18 < b.y+b.h &&
-    a.y+a.h-15 > b.y;
+  return a.x+15<b.x+b.w &&
+    a.x+a.w-15>b.x &&
+    a.y+12<b.y+b.h &&
+    a.y+a.h-10>b.y;
 }
 
-/* NEXT LEVEL */
 function nextLevel() {
-  if(level >= 200) {
-    running = false;
-    gameOver = true;
-
-    document.getElementById("message").textContent =
-      "🏆 CHAMPION! You completed all 200 levels!";
+  if(level>=200) {
+    running=false;
+    gameOver=true;
 
     playSound("level");
+
+    document.getElementById("message").textContent =
+      "🏆 CHAMPION! ALL 200 LEVELS COMPLETED!";
+
     draw();
     return;
   }
 
   level++;
-  timeLeft = levelDuration(level);
-  obstacles = [];
-  treasures = [];
-  spawnTimer = 0;
+  timeLeft=levelDuration(level);
 
-  document.getElementById("message").textContent =
-    "🎉 Level " + level + " started!";
+  obstacles=[];
+  treasures=[];
+  spawnTimer=0;
 
   playSound("level");
+
+  document.getElementById("message").textContent =
+    "🎉 LEVEL "+level+" STARTED!";
+
   updateInfo();
 }
 
-/* GAME OVER */
 function endGame() {
-  running = false;
-  gameOver = true;
-
-  document.getElementById("message").textContent =
-    "GAME OVER! Score: " + score + " | Press PLAY";
+  running=false;
+  gameOver=true;
 
   playSound("over");
-  draw();
+
+  document.getElementById("message").textContent =
+    "GAME OVER! SCORE: "+score;
+
+  document.getElementById("hud").style.display = "none";
+  document.getElementById("homeScreen").style.display = "flex";
+  document.getElementById("homeSound").style.display = "block";
+
+  drawHome();
 }
 
-/* UPDATE */
 function update(dt) {
-  animationTime += dt * 1000;
+  animationTime+=dt*1000;
 
-  if(invulnerable > 0) {
-    invulnerable -= dt * 1000;
-  }
+  if(invulnerable>0) invulnerable-=dt*1000;
 
-  timeLeft -= dt;
+  timeLeft-=dt;
 
-  if(timeLeft <= 0) {
+  if(timeLeft<=0) {
     nextLevel();
     return;
   }
 
-  score += Math.floor(dt * 10);
+  score+=Math.floor(dt*10);
 
-  player.vy += 0.75;
-  player.y += player.vy;
+  player.vy+=0.75;
+  player.y+=player.vy;
 
-  if(player.y + player.h >= groundY) {
-    player.y = groundY - player.h;
-    player.vy = 0;
-    player.ground = true;
+  if(player.y+player.h>=groundY) {
+    player.y=groundY-player.h;
+    player.vy=0;
+    player.ground=true;
   }
 
   spawnObjects(dt);
 
-  let speed = 300 * difficulty();
+  let speed=300*difficulty();
 
-  obstacles.forEach(o => o.x -= speed * dt);
-  treasures.forEach(t => t.x -= speed * dt);
+  obstacles.forEach(o=>o.x-=speed*dt);
+  treasures.forEach(t=>t.x-=speed*dt);
 
-  obstacles = obstacles.filter(o => o.x + o.w > 0);
-  treasures = treasures.filter(t => t.x + 35 > 0);
+  obstacles=obstacles.filter(o=>o.x+o.w>0);
+  treasures=treasures.filter(t=>t.x+35>0);
 
   for(let i=0;i<obstacles.length;i++) {
-    if(hit(player,obstacles[i]) && invulnerable <= 0) {
+    if(hit(player,obstacles[i])&&invulnerable<=0) {
       lives--;
-      invulnerable = 1500;
-      obstacles.splice(i,1);
-      playSound("hit");
+      invulnerable=1500;
 
-      if(lives <= 0) {
+      playSound("hit");
+      obstacles.splice(i,1);
+
+      if(lives<=0) {
         endGame();
         return;
       }
+
       break;
     }
   }
 
   for(let i=treasures.length-1;i>=0;i--) {
-    let t = treasures[i];
-    let box = {
+    let t=treasures[i];
+
+    let box={
       x:t.x,
       y:t.y-25,
       w:30,
@@ -649,13 +820,14 @@ function update(dt) {
     };
 
     if(hit(player,box)) {
-      if(t.type === "coin") {
+      if(t.type==="coin") {
         coins++;
         playSound("coin");
       } else {
-        score += 50;
+        score+=50;
         playSound("coin");
       }
+
       treasures.splice(i,1);
     }
   }
@@ -663,10 +835,13 @@ function update(dt) {
   updateInfo();
 }
 
-/* DRAW */
+function drawHome() {
+  drawBackground();
+}
+
 function draw() {
   if (!running && !gameOver) {
-    drawHomeScreen();
+    drawHome();
     return;
   }
 
@@ -675,48 +850,48 @@ function draw() {
   obstacles.forEach(drawObstacle);
   treasures.forEach(drawTreasure);
 
-  /* Shadow helps identify ground and jump height */
   drawMonkeyShadow();
   drawMonkey();
 
   if(paused || gameOver) {
-    ctx.fillStyle = "rgba(0,0,0,.5)";
+    ctx.fillStyle="rgba(0,0,0,.5)";
     ctx.fillRect(0,0,900,450);
 
-    ctx.fillStyle = "white";
-    ctx.font = "bold 48px Arial";
-    ctx.textAlign = "center";
+    ctx.fillStyle="white";
+    ctx.font="bold 48px Arial";
+    ctx.textAlign="center";
 
     ctx.fillText(
-      paused ? "PAUSED" :
-      (level >= 200 ? "CHAMPION!" : "GAME OVER"),
+      paused?"PAUSED":
+      (level>=200?"CHAMPION!":"GAME OVER"),
       450,220
     );
 
-    ctx.textAlign = "left";
+    ctx.textAlign="left";
   }
 }
 
-/* GAME LOOP */
 function loop(timestamp) {
-  if(!running || paused || gameOver) return;
+  if(!running||paused||gameOver) return;
 
-  if(!lastTime) lastTime = timestamp;
+  if(!lastTime) lastTime=timestamp;
 
-  let dt = Math.min((timestamp-lastTime)/1000,0.04);
-  lastTime = timestamp;
+  let dt=Math.min((timestamp-lastTime)/1000,0.04);
+
+  lastTime=timestamp;
 
   update(dt);
   draw();
 
-  if(running && !paused && !gameOver) {
+  if(running&&!paused&&!gameOver) {
     requestAnimationFrame(loop);
   }
 }
 
+updateSoundButtons();
 draw();
 updateInfo();
-
 </script>
+
 </body>
 </html>
