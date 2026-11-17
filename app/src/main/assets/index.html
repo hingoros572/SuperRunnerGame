@@ -401,11 +401,25 @@ stillImage.onload = () => {
   draw();
 };
 
+/* NEW VICTORY ANIMATION IMAGE */
+
+const victoryImage = new Image();
+victoryImage.src = "victory.png";
+let victoryLoaded = false;
+
+victoryImage.onload = () => {
+  victoryLoaded = true;
+  draw();
+};
+
 /* GAME VARIABLES */
 
 let running = false;
 let paused = false;
 let gameOver = false;
+
+/* NEW VICTORY STATE */
+let victoryActive = false;
 
 let level = 1;
 let score = 0;
@@ -484,6 +498,9 @@ function showGame() {
 function startGame() {
   unlockAudio();
   playSound("play");
+
+  /* STOP OLD VICTORY ANIMATION */
+  victoryActive = false;
 
   level = 1;
   score = 0;
@@ -638,6 +655,23 @@ function drawMonkeyShadow() {
 }
 
 function drawMonkey() {
+
+  /* NEW VICTORY SPRITE ANIMATION */
+  if (victoryActive && victoryLoaded) {
+    const fw = victoryImage.naturalWidth / 4;
+    const fh = victoryImage.naturalHeight;
+
+    const frame = Math.floor(animationTime / 160) % 4;
+
+    ctx.drawImage(
+      victoryImage,
+      frame * fw, 0, fw, fh,
+      player.x, player.y, player.w, player.h
+    );
+
+    return;
+  }
+
   if(invulnerable>0 &&
      Math.floor(animationTime/70)%2===0) return;
 
@@ -719,12 +753,22 @@ function nextLevel() {
     running=false;
     gameOver=true;
 
+    /* START VICTORY ANIMATION */
+    victoryActive=true;
+    invulnerable=0;
+
+    player.y=groundY-player.h;
+    player.vy=0;
+    player.ground=true;
+
     playSound("level");
 
     document.getElementById("message").textContent =
       "🏆 CHAMPION! ALL 200 LEVELS COMPLETED!";
 
     draw();
+
+    requestAnimationFrame(victoryLoop);
     return;
   }
 
@@ -746,6 +790,9 @@ function nextLevel() {
 function endGame() {
   running=false;
   gameOver=true;
+
+  /* NO VICTORY ANIMATION ON GAME OVER */
+  victoryActive=false;
 
   playSound("over");
 
@@ -869,6 +916,17 @@ function draw() {
 
     ctx.textAlign="left";
   }
+}
+
+/* NEW VICTORY ANIMATION LOOP */
+
+function victoryLoop() {
+  if (!victoryActive) return;
+
+  animationTime += 16;
+  draw();
+
+  requestAnimationFrame(victoryLoop);
 }
 
 function loop(timestamp) {
