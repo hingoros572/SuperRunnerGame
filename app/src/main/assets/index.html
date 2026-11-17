@@ -276,7 +276,7 @@ h2 {
     <span id="score">Score: 0</span>
     <span id="coins">Coins: 0</span>
     <span id="lives">❤️❤️❤️</span>
-    <span id="timer">04:00</span>
+    <span id="timer">02:00</span>
   </div>
 </div>
 
@@ -438,7 +438,7 @@ let level = 1;
 let score = 0;
 let coins = 0;
 let lives = 3;
-let timeLeft = 240;
+let timeLeft = 120;
 
 /* BANANA HEALTH COUNTER */
 
@@ -466,11 +466,17 @@ const player = {
 
 const groundY = 395;
 
+/* LEVEL TIME SETTINGS */
+
 function levelDuration(n) {
-  if (n <= 50) return 240;
-  if (n <= 100) return 300;
-  if (n <= 150) return 360;
-  return 480;
+  if (n <= 25) return 120;
+  if (n <= 50) return 150;
+  if (n <= 75) return 180;
+  if (n <= 100) return 210;
+  if (n <= 125) return 240;
+  if (n <= 150) return 270;
+  if (n <= 175) return 300;
+  return 330;
 }
 
 /* SPEED INCREASES EVERY 25 LEVELS */
@@ -565,13 +571,13 @@ function startGame() {
   requestAnimationFrame(loop);
 }
 
-/* LONGER AND HIGHER JUMP */
+/* JUMP POWER REDUCED BY 1 POINT */
 
 function jump() {
   if (!running || paused || gameOver) return;
 
   if (player.ground) {
-    player.vy = -22;
+    player.vy = -21;
     player.ground = false;
     playSound("jump");
   }
