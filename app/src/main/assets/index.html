@@ -786,6 +786,8 @@ function closeLevelSelect() {
 
 let soundEnabled = true;
 let audioContext = null;
+let musicTimer = null;
+let musicStep = 0;
 
 function unlockAudio() {
   try {
@@ -804,49 +806,180 @@ function unlockAudio() {
   } catch (e) {}
 }
 
+/* SOUND EFFECT GENERATOR */
+
+function playTone(startFrequency, endFrequency, duration, type, volume) {
+  if (!soundEnabled) return;
+
+  try {
+    unlockAudio();
+    if (!audioContext) return;
+
+    const now = audioContext.currentTime;
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+
+    oscillator.type = type || "sine";
+    oscillator.frequency.setValueAtTime(startFrequency, now);
+    oscillator.frequency.exponentialRampToValueAtTime(
+      Math.max(1, endFrequency), now + duration
+    );
+
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(volume || 0.15, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(
+      0.001, now + duration + 0.04
+    );
+
+    oscillator.start(now);
+    oscillator.stop(now + duration + 0.05);
+
+  } catch (e) {}
+}
+
 function playSound(type) {
   if (!soundEnabled) return;
 
   try {
     unlockAudio();
-
     if (!audioContext) return;
 
+    const now = audioContext.currentTime;
+
+    if (type === "coin") {
+      // Coin collection: bright two-part ting sound
+      playTone(1050, 1550, 0.12, "sine", 0.20);
+
+      const coinSecond = audioContext.createOscillator();
+      const coinGain = audioContext.createGain();
+
+      coinSecond.type = "sine";
+      coinSecond.frequency.setValueAtTime(1750, now + 0.09);
+      coinSecond.connect(coinGain);
+      coinGain.connect(audioContext.destination);
+
+      coinGain.gain.setValueAtTime(0.001, now + 0.09);
+      coinGain.gain.linearRampToValueAtTime(0.13, now + 0.11);
+      coinGain.gain.exponentialRampToValueAtTime(
+        0.001, now + 0.25
+      );
+
+      coinSecond.start(now + 0.09);
+      coinSecond.stop(now + 0.27);
+      return;
+    }
+
+    if (type === "banana") {
+      // Banana collection: different soft pop/yum sound
+      playTone(520, 850, 0.12, "triangle", 0.18);
+      setTimeout(() => {
+        if (soundEnabled) {
+          playTone(720, 430, 0.16, "sine", 0.13);
+        }
+      }, 90);
+      return;
+    }
+
     const sounds = {
-      play:  [450, 750, 0.20],
-      jump:  [300, 650, 0.15],
-      coin:  [850, 1250, 0.12],
-      hit:   [180, 75, 0.25],
-      level: [500, 950, 0.30],
-      over:  [350, 90, 0.40]
+      play:  [450, 750, 0.20, "sine"],
+      jump:  [300, 650, 0.15, "sine"],
+      hit:   [180, 75, 0.25, "sawtooth"],
+      level: [500, 950, 0.30, "sine"],
+      over:  [350, 90, 0.40, "sawtooth"]
     };
 
     const data = sounds[type] || sounds.play;
+    playTone(data[0], data[1], data[2], data[3], 0.16);
+
+  } catch (e) {
+    console.log("Sound unavailable");
+  }
+}
+
+/* JUNGLE BACKGROUND MUSIC */
+
+const jungleNotes = [
+  261.63, 329.63, 392.00, 329.63,
+  293.66, 349.23, 440.00, 349.23,
+  261.63, 329.63, 392.00, 523.25,
+  440.00, 392.00, 329.63, 293.66
+];
+
+function playMusicNote() {
+  if (!audioContext || !soundEnabled) return;
+
+  try {
     const now = audioContext.currentTime;
+    const note = jungleNotes[musicStep % jungleNotes.length];
 
     const oscillator = audioContext.createOscillator();
     const gain = audioContext.createGain();
 
+    oscillator.type = "triangle";
+    oscillator.frequency.setValueAtTime(note, now);
+
     oscillator.connect(gain);
     gain.connect(audioContext.destination);
 
-    oscillator.type = "sine";
-    oscillator.frequency.setValueAtTime(data[0], now);
-    oscillator.frequency.exponentialRampToValueAtTime(
-      Math.max(1, data[1]), now + data[2]
-    );
-
     gain.gain.setValueAtTime(0.001, now);
-    gain.gain.linearRampToValueAtTime(0.18, now + 0.02);
-    gain.gain.exponentialRampToValueAtTime(
-      0.001, now + data[2] + 0.05
-    );
+    gain.gain.linearRampToValueAtTime(0.035, now + 0.04);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
 
     oscillator.start(now);
-    oscillator.stop(now + data[2] + 0.06);
+    oscillator.stop(now + 0.30);
 
-  } catch (e) {
-    console.log("Sound unavailable");
+    // Soft bass note on every fourth music step
+    if (musicStep % 4 === 0) {
+      const bass = audioContext.createOscillator();
+      const bassGain = audioContext.createGain();
+
+      bass.type = "sine";
+      bass.frequency.setValueAtTime(note / 2, now);
+
+      bass.connect(bassGain);
+      bassGain.connect(audioContext.destination);
+
+      bassGain.gain.setValueAtTime(0.001, now);
+      bassGain.gain.linearRampToValueAtTime(0.025, now + 0.04);
+      bassGain.gain.exponentialRampToValueAtTime(
+        0.001, now + 0.35
+      );
+
+      bass.start(now);
+      bass.stop(now + 0.37);
+    }
+
+    musicStep++;
+
+  } catch (e) {}
+}
+
+function startBackgroundMusic() {
+  if (!soundEnabled || !running || paused || gameOver) return;
+
+  unlockAudio();
+  stopBackgroundMusic();
+
+  musicStep = 0;
+  playMusicNote();
+
+  musicTimer = setInterval(() => {
+    if (!soundEnabled || !running || paused || gameOver) {
+      stopBackgroundMusic();
+      return;
+    }
+
+    playMusicNote();
+  }, 320);
+}
+
+function stopBackgroundMusic() {
+  if (musicTimer !== null) {
+    clearInterval(musicTimer);
+    musicTimer = null;
   }
 }
 
@@ -865,6 +998,9 @@ function toggleSound() {
   if (soundEnabled) {
     unlockAudio();
     playSound("play");
+    startBackgroundMusic();
+  } else {
+    stopBackgroundMusic();
   }
 }
 
@@ -1066,6 +1202,8 @@ function startGame(selectedLevel = 1) {
   updateInfo();
   draw();
 
+  startBackgroundMusic();
+
   requestAnimationFrame(loop);
 }
 
@@ -1085,6 +1223,12 @@ function togglePause() {
   if (!running || gameOver) return;
 
   paused = !paused;
+
+  if (paused) {
+    stopBackgroundMusic();
+  } else {
+    startBackgroundMusic();
+  }
 
   document.getElementById("message").textContent =
     paused ? "⏸ GAME PAUSED" : "KEEP RUNNING!";
@@ -1305,6 +1449,9 @@ function hit(a,b) {
 
 function nextLevel() {
 
+  /* STOP MUSIC WHEN LEVEL CARD OPENS */
+  stopBackgroundMusic();
+
   /* CURRENT LEVEL SUCCESS AND SAVE */
 
   completeLevel(level);
@@ -1429,12 +1576,17 @@ function continueAfterCard() {
   updateInfo();
   draw();
 
+  startBackgroundMusic();
+
   requestAnimationFrame(loop);
 }
 
 function endGame() {
   running=false;
   gameOver=true;
+
+  /* STOP BACKGROUND MUSIC ON GAME OVER */
+  stopBackgroundMusic();
 
   victoryActive=false;
 
@@ -1517,7 +1669,7 @@ function update(dt) {
         playSound("coin");
       } else {
         score+=50;
-        playSound("coin");
+        playSound("banana");
 
         /* EVERY 10 BANANAS GIVE 1 HEALTH */
         bananasCollected++;
