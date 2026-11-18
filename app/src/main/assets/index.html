@@ -6,1761 +6,785 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#168b38">
 <title>Super Monkey Runner</title>
-
 <style>
-* {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-}
-
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  height: 100dvh;
-  overflow: hidden;
-  background: #168b38;
-  font-family: Arial, sans-serif;
-  touch-action: manipulation;
-}
-
-#game {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-  touch-action: manipulation;
-}
-
-/* HOME SCREEN */
-
-#homeScreen {
-  position: absolute;
-  inset: 0;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  overflow: hidden;
-  background:
-    linear-gradient(rgba(0,30,10,.12),rgba(0,30,10,.25)),
-    url("jungle-bg.png") center center / 100% 100% no-repeat;
-}
-
-.home-title {
-  color: #fff;
-  font-size: clamp(25px, 5vw, 52px);
-  font-weight: 1000;
-  letter-spacing: 1px;
-  text-shadow: 3px 4px 0 #174b1c, 0 0 15px #174b1c;
-  margin-bottom: 5px;
-}
-
-.home-subtitle {
-  color: #fff6b0;
-  font-size: clamp(13px, 2.5vw, 22px);
-  font-weight: 900;
-  text-shadow: 2px 3px 4px #174b1c;
-}
-
-.home-monkey {
-  width: clamp(110px, 23vw, 190px);
-  height: clamp(120px, 27vw, 210px);
-  object-fit: contain;
-  filter: drop-shadow(0 9px 8px rgba(0,0,0,.4));
-  animation: monkeyBounce 1.4s infinite ease-in-out;
-}
-
-@keyframes monkeyBounce {
-  0%,100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-#homePlay {
-  min-width: 190px;
-  padding: 15px 35px;
-  border: 3px solid white;
-  border-radius: 50px;
-  background: linear-gradient(180deg,#fff16a,#ffad16);
-  color: #613000;
-  font-size: 23px;
-  font-weight: 1000;
-  box-shadow: 0 7px 0 #a94e08, 0 10px 20px rgba(0,0,0,.3);
-  margin-top: 12px;
-}
-
-#homePlay:active {
-  transform: translateY(5px);
-}
-
-.home-levels {
-  color: white;
-  font-size: clamp(11px, 2vw, 17px);
-  font-weight: 900;
-  text-shadow: 2px 2px 4px #17451c;
-  margin-top: 18px;
-}
-
-/* SOUND BUTTON */
-
-.sound-btn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 40;
-  min-width: 105px;
-  padding: 9px 12px;
-  border: 2px solid white;
-  border-radius: 30px;
-  background: rgba(0,35,10,.65);
-  color: white;
-  font-size: 12px;
-  font-weight: 900;
-  box-shadow: 0 3px 10px rgba(0,0,0,.25);
-}
-
-/* LEVEL SELECTION SCREEN */
-
-#levelScreen {
-  display: none;
-  position: absolute;
-  inset: 0;
-  z-index: 30;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 15px 12px 25px;
-  text-align: center;
-  background:
-    linear-gradient(rgba(0,35,10,.72),rgba(0,20,5,.88)),
-    url("jungle-bg.png") center center / cover no-repeat;
-}
-
-.level-heading {
-  color: #fff;
-  font-size: clamp(22px,5vw,36px);
-  font-weight: 1000;
-  text-shadow: 2px 3px 5px #000;
-  margin: 10px 0 5px;
-}
-
-.level-subheading {
-  color: #fff4a3;
-  font-weight: 900;
-  font-size: 14px;
-  margin-bottom: 12px;
-}
-
-.level-progress {
-  display: inline-block;
-  color: white;
-  background: rgba(0,0,0,.45);
-  border: 1px solid rgba(255,255,255,.5);
-  border-radius: 25px;
-  padding: 9px 18px;
-  margin-bottom: 15px;
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.level-legend {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  color: white;
-  font-size: 11px;
-  font-weight: bold;
-  margin-bottom: 15px;
-}
-
-.level-legend span {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.level-grid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 12px 7px;
-  max-width: 650px;
-  margin: 0 auto;
-  padding: 5px 2px 20px;
-}
-
-.level-card {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border: none;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  clip-path: polygon(
-    50% 0%,
-    62% 28%,
-    96% 28%,
-    70% 49%,
-    80% 84%,
-    50% 65%,
-    20% 84%,
-    30% 49%,
-    4% 28%,
-    38% 28%
-  );
-  color: #563000;
-  background: linear-gradient(145deg,#fff37b,#ffad16 65%,#e77800);
-  filter: drop-shadow(0 3px 3px rgba(0,0,0,.5));
-  cursor: pointer;
-  font-weight: 1000;
-}
-
-.level-card:active {
-  transform: scale(.91);
-}
-
-.level-card .star-symbol {
-  font-size: clamp(19px,5vw,31px);
-  line-height: 1;
-  text-shadow: 1px 2px 2px rgba(120,60,0,.35);
-}
-
-.level-card .level-number {
-  font-size: clamp(12px,3vw,18px);
-  margin-top: 1px;
-  text-shadow: 1px 1px 1px rgba(255,255,255,.4);
-}
-
-.level-card.completed {
-  background: linear-gradient(145deg,#fff99b,#ffbf00 55%,#ff8500);
-}
-
-.level-card.unlocked {
-  background: linear-gradient(145deg,#fff5a1,#ffc12a 60%,#ed8900);
-}
-
-.level-card.locked {
-  background: linear-gradient(145deg,#b9c0c2,#737d82 65%,#465158);
-  color: #30383b;
-  cursor: not-allowed;
-  filter: grayscale(.35);
-}
-
-.level-card .lock-symbol {
-  font-size: clamp(17px,4vw,25px);
-  line-height: 1;
-}
-
-.level-card .mini-stars {
-  color: white;
-  font-size: clamp(7px,1.8vw,11px);
-  letter-spacing: -1px;
-  text-shadow: 1px 1px 2px #9a5700;
-  margin-top: 1px;
-}
-
-#backHome {
-  padding: 11px 25px;
-  border: 2px solid white;
-  border-radius: 30px;
-  background: linear-gradient(#fff16a,#ffad18);
-  color: #573000;
-  font-weight: 1000;
-  font-size: 15px;
-  margin: 5px auto 20px;
-}
-
-/* GOLDEN LEVEL COMPLETE CARD */
-
-#levelCompleteScreen {
-  display: none;
-  position: absolute;
-  inset: 0;
-  z-index: 100;
-  align-items: center;
-  justify-content: center;
-  padding: 12px;
-  background: rgba(0, 20, 5, .78);
-  overflow: hidden;
-}
-
-.complete-card {
-  width: min(92vw, 650px);
-  max-height: 95%;
-  overflow-y: auto;
-  text-align: center;
-  padding: 18px 16px 20px;
-  border: 5px solid #ffe76b;
-  border-radius: 28px;
-  background:
-    radial-gradient(circle at top, #fff6a8, transparent 45%),
-    linear-gradient(145deg, #ffdf42, #f59a00 65%, #a84b00);
-  box-shadow:
-    0 0 0 5px #9b4b00,
-    0 0 30px #ffdf42,
-    inset 0 0 18px rgba(255,255,255,.65);
-  color: #5a2600;
-}
-
-.complete-brand {
-  color: #fff8b0;
-  font-size: clamp(15px, 3vw, 23px);
-  font-weight: 1000;
-  text-shadow: 2px 3px 3px #713400;
-}
-
-.complete-title {
-  margin: 8px 0;
-  padding: 10px 5px;
-  border: 3px solid #ffed72;
-  border-radius: 18px;
-  background: linear-gradient(#f44316, #a90000);
-  color: #fff13b;
-  font-size: clamp(25px, 6vw, 48px);
-  font-weight: 1000;
-  text-shadow: 3px 4px 2px #6b1600;
-}
-
-.complete-monkey {
-  font-size: clamp(48px, 10vw, 78px);
-  line-height: 1.1;
-  margin: 5px;
-  filter: drop-shadow(0 5px 3px rgba(0,0,0,.3));
-}
-
-.complete-stars {
-  color: #fff600;
-  font-size: clamp(35px, 8vw, 58px);
-  letter-spacing: 5px;
-  text-shadow: 2px 4px 2px #a34a00;
-  margin: 5px;
-}
-
-.complete-level {
-  background: #713300;
-  color: white;
-  border: 2px solid #ffdc54;
-  border-radius: 16px;
-  padding: 10px;
-  margin: 10px auto;
-  max-width: 430px;
-  font-size: clamp(19px, 4vw, 30px);
-  font-weight: 1000;
-}
-
-.complete-unlocked {
-  color: #075b0b;
-  font-size: clamp(17px, 3.5vw, 25px);
-  font-weight: 1000;
-  margin: 12px 0;
-  text-shadow: 1px 1px white;
-}
-
-#nextLevelButton {
-  width: min(90%, 390px);
-  padding: 15px 10px;
-  border: 4px solid white;
-  border-radius: 50px;
-  background: linear-gradient(#fff66b, #ff9e00);
-  color: #5a2900;
-  font-size: clamp(20px, 4vw, 30px);
-  font-weight: 1000;
-  box-shadow: 0 7px 0 #a94e08, 0 10px 15px rgba(0,0,0,.3);
-  margin-top: 10px;
-}
-
-#nextLevelButton:active {
-  transform: translateY(5px);
-  box-shadow: 0 2px 0 #a94e08;
-}
-
-.final-champion {
-  color: #fff000;
-  font-size: clamp(28px, 6vw, 52px);
-  font-weight: 1000;
-  text-shadow: 3px 4px 3px #8a2500;
-}
-
-.final-message {
-  color: #5b2600;
-  background: #fff0b0;
-  border: 3px solid #fff;
-  border-radius: 15px;
-  padding: 12px;
-  font-size: clamp(17px, 3.5vw, 25px);
-  font-weight: 1000;
-  margin: 12px auto;
-}
-
-@media (orientation: portrait) {
-  .home-title { font-size: 25px; }
-  .home-monkey { width: 115px; height: 130px; }
-  #homePlay { min-width: 160px; padding: 12px 25px; }
-  h2 { font-size: 11px; }
-  .game-btn { padding: 7px 8px; min-width: 43px; }
-  #info { font-size: 9px; gap: 3px; padding: 6px 3px; }
-  .sound-btn { top: 8px; right: 8px; }
-  .level-grid { gap: 9px 5px; }
-}
-
-@media (min-width: 600px) {
-  .level-grid {
-    grid-template-columns: repeat(8, minmax(0, 1fr));
-    gap: 14px 10px;
-  }
-}
-
-@media (orientation: landscape) {
-  .complete-card {
-    width: min(75vw, 650px);
-    padding: 10px 18px;
-  }
-
-  .complete-monkey {
-    font-size: 48px;
-    margin: 0;
-  }
-
-  .complete-stars {
-    font-size: 38px;
-    margin: 0;
-  }
-
-  .complete-title {
-    margin: 5px 0;
-  }
-
-  .complete-level {
-    margin: 6px auto;
-    padding: 6px;
-  }
-
-  #nextLevelButton {
-    padding: 10px;
-    margin-top: 5px;
-  }
-}
-
-/* GAME HUD */
-
-#hud {
-  display: none;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 5;
-  padding: 7px 9px;
-  color: white;
-  background: linear-gradient(
-    to bottom,
-    rgba(0,35,15,.35),
-    rgba(0,35,15,0)
-  );
-}
-
-.toprow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-}
-
-h2 {
-  margin: 0;
-  font-size: clamp(12px, 2.7vw, 19px);
-  font-weight: 1000;
-  text-shadow: 2px 2px 4px #000;
-  white-space: nowrap;
-}
-
-.controls {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.game-btn {
-  border: 2px solid rgba(255,255,255,.9);
-  border-radius: 12px;
-  padding: 8px 12px;
-  min-width: 55px;
-  background: linear-gradient(#ffe96a,#ffad18);
-  color: #422500;
-  font-size: clamp(10px, 2.5vw, 14px);
-  font-weight: 1000;
-  white-space: nowrap;
-  touch-action: manipulation;
-}
-
-.game-btn:active {
-  transform: scale(.94);
-}
-
-#info {
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  gap: 6px;
-  margin-top: 7px;
-  padding: 7px 9px;
-  border: 1px solid rgba(255,255,255,.45);
-  border-radius: 20px;
-  background: rgba(0,25,10,.38);
-  backdrop-filter: blur(5px);
-  font-size: clamp(10px, 2.5vw, 14px);
-  font-weight: 1000;
-  text-shadow: 1px 1px 3px #000;
-  white-space: nowrap;
-}
-
-#message {
-  display: none;
-  position: absolute;
-  z-index: 6;
-  left: 50%;
-  bottom: 12px;
-  transform: translateX(-50%);
-  max-width: 90%;
-  padding: 9px 15px;
-  border: 1px solid rgba(255,255,255,.5);
-  border-radius: 20px;
-  background: rgba(0,30,10,.55);
-  color: white;
-  text-align: center;
-  font-size: 13px;
-  font-weight: bold;
-  pointer-events: none;
-}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;width:100%;height:100%;height:100dvh;overflow:hidden;background:#168b38;font-family:Arial,sans-serif;touch-action:manipulation}
+#game{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:manipulation}
+#homeScreen{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden;background:linear-gradient(rgba(0,30,10,.12),rgba(0,30,10,.25)),url("jungle-bg.png") center center/100% 100% no-repeat}
+.home-title{color:#fff;font-size:clamp(25px,5vw,52px);font-weight:1000;letter-spacing:1px;text-shadow:3px 4px 0 #174b1c,0 0 15px #174b1c;margin-bottom:5px}
+.home-subtitle{color:#fff6b0;font-size:clamp(13px,2.5vw,22px);font-weight:900;text-shadow:2px 3px 4px #174b1c}
+.home-monkey{width:clamp(110px,23vw,190px);height:clamp(120px,27vw,210px);object-fit:contain;filter:drop-shadow(0 9px 8px rgba(0,0,0,.4));animation:monkeyBounce 1.4s infinite ease-in-out}
+@keyframes monkeyBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+#homePlay{min-width:190px;padding:15px 35px;border:3px solid white;border-radius:50px;background:linear-gradient(180deg,#fff16a,#ffad16);color:#613000;font-size:23px;font-weight:1000;box-shadow:0 7px 0 #a94e08,0 10px 20px rgba(0,0,0,.3);margin-top:12px}
+#homePlay:active{transform:translateY(5px)}
+.home-levels{color:white;font-size:clamp(11px,2vw,17px);font-weight:900;text-shadow:2px 2px 4px #17451c;margin-top:18px}
+.sound-btn{position:absolute;top:12px;right:12px;z-index:40;min-width:105px;padding:9px 12px;border:2px solid white;border-radius:30px;background:rgba(0,35,10,.65);color:white;font-size:12px;font-weight:900;box-shadow:0 3px 10px rgba(0,0,0,.25)}
+#levelScreen{display:none;position:absolute;inset:0;z-index:30;overflow-y:auto;overscroll-behavior:contain;padding:15px 12px 25px;text-align:center;background:linear-gradient(rgba(0,35,10,.72),rgba(0,20,5,.88)),url("jungle-bg.png") center center/cover no-repeat}
+.level-heading{color:#fff;font-size:clamp(22px,5vw,36px);font-weight:1000;text-shadow:2px 3px 5px #000;margin:10px 0 5px}
+.level-subheading{color:#fff4a3;font-weight:900;font-size:14px;margin-bottom:12px}
+.level-progress{display:inline-block;color:white;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.5);border-radius:25px;padding:9px 18px;margin-bottom:15px;font-size:13px;font-weight:900}
+.level-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;color:white;font-size:11px;font-weight:bold;margin-bottom:15px}
+.level-legend span{display:flex;align-items:center;gap:4px}
+.level-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px 7px;max-width:650px;margin:0 auto;padding:5px 2px 20px}
+.level-card{position:relative;width:100%;aspect-ratio:1/1;border:none;padding:0;display:flex;flex-direction:column;justify-content:center;align-items:center;clip-path:polygon(50% 0%,62% 28%,96% 28%,70% 49%,80% 84%,50% 65%,20% 84%,30% 49%,4% 28%,38% 28%);color:#563000;background:linear-gradient(145deg,#fff37b,#ffad16 65%,#e77800);filter:drop-shadow(0 3px 3px rgba(0,0,0,.5));cursor:pointer;font-weight:1000}
+.level-card:active{transform:scale(.91)}
+.level-card .star-symbol{font-size:clamp(19px,5vw,31px);line-height:1;text-shadow:1px 2px 2px rgba(120,60,0,.35)}
+.level-card .level-number{font-size:clamp(12px,3vw,18px);margin-top:1px;text-shadow:1px 1px 1px rgba(255,255,255,.4)}
+.level-card.completed{background:linear-gradient(145deg,#fff99b,#ffbf00 55%,#ff8500)}
+.level-card.unlocked{background:linear-gradient(145deg,#fff5a1,#ffc12a 60%,#ed8900)}
+.level-card.locked{background:linear-gradient(145deg,#b9c0c2,#737d82 65%,#465158);color:#30383b;cursor:not-allowed;filter:grayscale(.35)}
+.level-card .lock-symbol{font-size:clamp(17px,4vw,25px);line-height:1}
+.level-card .mini-stars{color:white;font-size:clamp(7px,1.8vw,11px);letter-spacing:-1px;text-shadow:1px 1px 2px #9a5700;margin-top:1px}
+#backHome{padding:11px 25px;border:2px solid white;border-radius:30px;background:linear-gradient(#fff16a,#ffad18);color:#573000;font-weight:1000;font-size:15px;margin:5px auto 20px}
+#levelCompleteScreen{display:none;position:absolute;inset:0;z-index:100;align-items:center;justify-content:center;padding:12px;background:rgba(0,20,5,.78);overflow:hidden}
+.complete-card{width:min(92vw,650px);max-height:95%;overflow-y:auto;text-align:center;padding:18px 16px 20px;border:5px solid #ffe76b;border-radius:28px;background:radial-gradient(circle at top,#fff6a8,transparent 45%),linear-gradient(145deg,#ffdf42,#f59a00 65%,#a84b00);box-shadow:0 0 0 5px #9b4b00,0 0 30px #ffdf42,inset 0 0 18px rgba(255,255,255,.65);color:#5a2600}
+.complete-brand{color:#fff8b0;font-size:clamp(15px,3vw,23px);font-weight:1000;text-shadow:2px 3px 3px #713400}
+.complete-title{margin:8px 0;padding:10px 5px;border:3px solid #ffed72;border-radius:18px;background:linear-gradient(#f44316,#a90000);color:#fff13b;font-size:clamp(25px,6vw,48px);font-weight:1000;text-shadow:3px 4px 2px #6b1600}
+.complete-monkey{font-size:clamp(48px,10vw,78px);line-height:1.1;margin:5px;filter:drop-shadow(0 5px 3px rgba(0,0,0,.3))}
+.complete-stars{color:#fff600;font-size:clamp(35px,8vw,58px);letter-spacing:5px;text-shadow:2px 4px 2px #a34a00;margin:5px}
+.complete-level{background:#713300;color:white;border:2px solid #ffdc54;border-radius:16px;padding:10px;margin:10px auto;max-width:430px;font-size:clamp(19px,4vw,30px);font-weight:1000}
+.complete-unlocked{color:#075b0b;font-size:clamp(17px,3.5vw,25px);font-weight:1000;margin:12px 0;text-shadow:1px 1px white}
+#nextLevelButton{width:min(90%,390px);padding:15px 10px;border:4px solid white;border-radius:50px;background:linear-gradient(#fff66b,#ff9e00);color:#5a2900;font-size:clamp(20px,4vw,30px);font-weight:1000;box-shadow:0 7px 0 #a94e08,0 10px 15px rgba(0,0,0,.3);margin-top:10px}
+#nextLevelButton:active{transform:translateY(5px);box-shadow:0 2px 0 #a94e08}
+.final-champion{color:#fff000;font-size:clamp(28px,6vw,52px);font-weight:1000;text-shadow:3px 4px 3px #8a2500}
+.final-message{color:#5b2600;background:#fff0b0;border:3px solid #fff;border-radius:15px;padding:12px;font-size:clamp(17px,3.5vw,25px);font-weight:1000;margin:12px auto}
+@media(orientation:portrait){.home-title{font-size:25px}.home-monkey{width:115px;height:130px}#homePlay{min-width:160px;padding:12px 25px}h2{font-size:11px}.game-btn{padding:7px 8px;min-width:43px}#info{font-size:9px;gap:3px;padding:6px 3px}.sound-btn{top:8px;right:8px}.level-grid{gap:9px 5px}}
+@media(min-width:600px){.level-grid{grid-template-columns:repeat(8,minmax(0,1fr));gap:14px 10px}}
+@media(orientation:landscape){.complete-card{width:min(75vw,650px);padding:10px 18px}.complete-monkey{font-size:48px;margin:0}.complete-stars{font-size:38px;margin:0}.complete-title{margin:5px 0}.complete-level{margin:6px auto;padding:6px}#nextLevelButton{padding:10px;margin-top:5px}}
+#hud{display:none;position:absolute;top:0;left:0;right:0;z-index:5;padding:7px 9px;color:white;background:linear-gradient(to bottom,rgba(0,35,15,.35),rgba(0,35,15,0))}
+.toprow{display:flex;align-items:center;justify-content:space-between;gap:6px}
+h2{margin:0;font-size:clamp(12px,2.7vw,19px);font-weight:1000;text-shadow:2px 2px 4px #000;white-space:nowrap}
+.controls{display:flex;align-items:center;gap:6px}
+.game-btn{border:2px solid rgba(255,255,255,.9);border-radius:12px;padding:8px 12px;min-width:55px;background:linear-gradient(#ffe96a,#ffad18);color:#422500;font-size:clamp(10px,2.5vw,14px);font-weight:1000;white-space:nowrap;touch-action:manipulation}
+.game-btn:active{transform:scale(.94)}
+#info{display:flex;align-items:center;justify-content:space-around;gap:6px;margin-top:7px;padding:7px 9px;border:1px solid rgba(255,255,255,.45);border-radius:20px;background:rgba(0,25,10,.38);backdrop-filter:blur(5px);font-size:clamp(10px,2.5vw,14px);font-weight:1000;text-shadow:1px 1px 3px #000;white-space:nowrap}
+#message{display:none;position:absolute;z-index:6;left:50%;bottom:12px;transform:translateX(-50%);max-width:90%;padding:9px 15px;border:1px solid rgba(255,255,255,.5);border-radius:20px;background:rgba(0,30,10,.55);color:white;text-align:center;font-size:13px;font-weight:bold;pointer-events:none}
 </style>
 </head>
-
 <body>
-
 <canvas id="game" width="900" height="450"></canvas>
 
-<!-- HOME SCREEN -->
 <div id="homeScreen">
-  <div class="home-title">SUPER MONKEY RUNNER</div>
-  <div class="home-subtitle">THE JUNGLE ADVENTURE!</div>
-
-  <img
-    class="home-monkey"
-    src="monkey.png"
-    alt="Super Monkey"
-    onerror="this.style.display='none'"
-  >
-
-  <button id="homePlay" onclick="openLevelSelect()">
-    ▶ PLAY NOW
-  </button>
-
-  <div class="home-levels">
-    🏆 200 LEVELS • RUN • JUMP • COLLECT
-  </div>
+<div class="home-title">SUPER MONKEY RUNNER</div>
+<div class="home-subtitle">THE JUNGLE ADVENTURE!</div>
+<img class="home-monkey" src="monkey.png" alt="Super Monkey" onerror="this.style.display='none'">
+<button id="homePlay" onclick="openLevelSelect()">▶ PLAY NOW</button>
+<div class="home-levels">🏆 200 LEVELS • RUN • JUMP • COLLECT</div>
 </div>
 
-<!-- LEVEL SELECTION -->
 <div id="levelScreen">
-  <div class="level-heading">⭐ SELECT YOUR LEVEL ⭐</div>
-  <div class="level-subheading">SUPER MONKEY RUNNER</div>
-
-  <div class="level-progress" id="levelProgress">
-    ⭐ UNLOCKED: 1 / 200
-  </div>
-
-  <div class="level-legend">
-    <span>🌟 Unlocked</span>
-    <span>🏆 Completed</span>
-    <span>🔒 Locked</span>
-  </div>
-
-  <div class="level-grid" id="levelGrid"></div>
-
-  <button id="backHome" onclick="closeLevelSelect()">
-    ◀ BACK TO HOME
-  </button>
+<div class="level-heading">⭐ SELECT YOUR LEVEL ⭐</div>
+<div class="level-subheading">SUPER MONKEY RUNNER</div>
+<div class="level-progress" id="levelProgress">⭐ UNLOCKED: 1 / 200</div>
+<div class="level-legend"><span>🌟 Unlocked</span><span>🏆 Completed</span><span>🔒 Locked</span></div>
+<div class="level-grid" id="levelGrid"></div>
+<button id="backHome" onclick="closeLevelSelect()">◀ BACK TO HOME</button>
 </div>
 
-<!-- HOME SOUND BUTTON -->
-<button class="sound-btn" id="homeSound" onclick="toggleSound()">
-  🔊 SOUND ON
-</button>
+<button class="sound-btn" id="homeSound" onclick="toggleSound()">🔊 SOUND ON</button>
 
-<!-- GAME HUD -->
 <div id="hud">
-  <div class="toprow">
-    <h2>🐵 SUPER MONKEY</h2>
-
-    <div class="controls">
-      <button class="game-btn" onclick="togglePause()">⏸ PAUSE</button>
-      <button class="game-btn" onclick="jump()">⬆ JUMP</button>
-      <button class="game-btn" onclick="toggleSound()" id="gameSound">
-        🔊 SOUND
-      </button>
-    </div>
-  </div>
-
-  <div id="info">
-    <span id="level">Level: 1/200</span>
-    <span id="score">Score: 0</span>
-    <span id="coins">Coins: 0</span>
-    <span id="lives">❤️❤️❤️</span>
-    <span id="timer">02:00</span>
-  </div>
+<div class="toprow">
+<h2>🐵 SUPER MONKEY</h2>
+<div class="controls">
+<button class="game-btn" onclick="togglePause()">⏸ PAUSE</button>
+<button class="game-btn" onclick="jump()">⬆ JUMP</button>
+<button class="game-btn" onclick="toggleSound()" id="gameSound">🔊 SOUND</button>
+</div>
+</div>
+<div id="info">
+<span id="level">Level: 1/200</span><span id="score">Score: 0</span><span id="coins">Coins: 0</span><span id="lives">❤️❤️❤️</span><span id="timer">02:00</span>
+</div>
 </div>
 
 <div id="message"></div>
 
-<!-- GOLDEN LEVEL COMPLETE CARD -->
 <div id="levelCompleteScreen">
-  <div class="complete-card">
-
-    <div class="complete-brand">
-      SUPER MONKEY RUNNER
-    </div>
-
-    <div class="complete-title" id="completeTitle">
-      LEVEL COMPLETE!
-    </div>
-
-    <div class="complete-monkey" id="completeMonkey">
-      🐵🎉
-    </div>
-
-    <div class="complete-stars">
-      ★★★
-    </div>
-
-    <div class="complete-level" id="completeLevelText">
-      LEVEL 1 COMPLETE
-    </div>
-
-    <div class="complete-unlocked" id="completeUnlocked">
-      🔓 LEVEL 2 UNLOCKED!
-    </div>
-
-    <div id="finalMessage" class="final-message"
-         style="display:none">
-      YOU ARE THE SUPER MONKEY CHAMPION! 🏆
-    </div>
-
-    <button id="nextLevelButton" onclick="continueAfterCard()">
-      ▶ NEXT LEVEL
-    </button>
-
-  </div>
+<div class="complete-card">
+<div class="complete-brand">SUPER MONKEY RUNNER</div>
+<div class="complete-title" id="completeTitle">LEVEL COMPLETE!</div>
+<div class="complete-monkey" id="completeMonkey">🐵🎉</div>
+<div class="complete-stars">★★★</div>
+<div class="complete-level" id="completeLevelText">LEVEL 1 COMPLETE</div>
+<div class="complete-unlocked" id="completeUnlocked">🔓 LEVEL 2 UNLOCKED!</div>
+<div id="finalMessage" class="final-message" style="display:none">YOU ARE THE SUPER MONKEY CHAMPION! 🏆</div>
+<button id="nextLevelButton" onclick="continueAfterCard()">▶ NEXT LEVEL</button>
+</div>
 </div>
 
 <script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
 
-/* LEVEL PROGRESS SAVE SYSTEM */
+let completedLevels=[];
+let maxUnlockedLevel=1;
 
-let completedLevels = [];
-let maxUnlockedLevel = 1;
-
-function loadLevelProgress() {
-  try {
-    const saved = JSON.parse(
-      localStorage.getItem("superMonkeyLevelProgress") || "{}"
-    );
-
-    if (Array.isArray(saved.completed)) {
-      completedLevels = saved.completed
-        .filter(n => Number.isInteger(n) && n >= 1 && n <= 200);
-    }
-
-    maxUnlockedLevel = Math.max(
-      1,
-      Math.min(200, Number(saved.unlocked) || 1)
-    );
-
-  } catch (e) {
-    completedLevels = [];
-    maxUnlockedLevel = 1;
-  }
+function loadLevelProgress(){
+try{
+const saved=JSON.parse(localStorage.getItem("superMonkeyLevelProgress")||"{}");
+if(Array.isArray(saved.completed))completedLevels=saved.completed.filter(n=>Number.isInteger(n)&&n>=1&&n<=200);
+maxUnlockedLevel=Math.max(1,Math.min(200,Number(saved.unlocked)||1));
+}catch(e){completedLevels=[];maxUnlockedLevel=1;}
 }
 
-function saveLevelProgress() {
-  try {
-    localStorage.setItem(
-      "superMonkeyLevelProgress",
-      JSON.stringify({
-        completed: completedLevels,
-        unlocked: maxUnlockedLevel
-      })
-    );
-  } catch (e) {}
+function saveLevelProgress(){
+try{localStorage.setItem("superMonkeyLevelProgress",JSON.stringify({completed:completedLevels,unlocked:maxUnlockedLevel}));}catch(e){}
 }
 
-function completeLevel(n) {
-  if (!completedLevels.includes(n)) {
-    completedLevels.push(n);
-  }
-
-  if (n < 200) {
-    maxUnlockedLevel = Math.max(maxUnlockedLevel, n + 1);
-  }
-
-  saveLevelProgress();
-  renderLevelCards();
+function completeLevel(n){
+if(!completedLevels.includes(n))completedLevels.push(n);
+if(n<200)maxUnlockedLevel=Math.max(maxUnlockedLevel,n+1);
+saveLevelProgress();
+renderLevelCards();
 }
 
-/* LEVEL CARD DISPLAY */
-
-function renderLevelCards() {
-  const grid = document.getElementById("levelGrid");
-  if (!grid) return;
-
-  grid.innerHTML = "";
-
-  for (let n = 1; n <= 200; n++) {
-    const card = document.createElement("button");
-    card.className = "level-card";
-
-    const completed = completedLevels.includes(n);
-    const unlocked = n <= maxUnlockedLevel;
-
-    if (completed) {
-      card.classList.add("completed");
-      card.innerHTML =
-        '<span class="star-symbol">★</span>' +
-        '<span class="level-number">' + n + '</span>' +
-        '<span class="mini-stars">★★★</span>';
-
-      card.title = "Level " + n + " Completed";
-
-    } else if (unlocked) {
-      card.classList.add("unlocked");
-      card.innerHTML =
-        '<span class="star-symbol">★</span>' +
-        '<span class="level-number">' + n + '</span>';
-
-      card.title = "Play Level " + n;
-
-    } else {
-      card.classList.add("locked");
-      card.innerHTML =
-        '<span class="lock-symbol">🔒</span>' +
-        '<span class="level-number">' + n + '</span>';
-
-      card.title = "Level Locked";
-      card.disabled = true;
-    }
-
-    if (unlocked) {
-      card.onclick = function() {
-        startGame(n);
-      };
-    }
-
-    grid.appendChild(card);
-  }
-
-  document.getElementById("levelProgress").textContent =
-    "⭐ UNLOCKED: " + maxUnlockedLevel + " / 200";
+function renderLevelCards(){
+const grid=document.getElementById("levelGrid");
+if(!grid)return;
+grid.innerHTML="";
+for(let n=1;n<=200;n++){
+const card=document.createElement("button");
+card.className="level-card";
+const completed=completedLevels.includes(n);
+const unlocked=n<=maxUnlockedLevel;
+if(completed){
+card.classList.add("completed");
+card.innerHTML='<span class="star-symbol">★</span><span class="level-number">'+n+'</span><span class="mini-stars">★★★</span>';
+card.title="Level "+n+" Completed";
+}else if(unlocked){
+card.classList.add("unlocked");
+card.innerHTML='<span class="star-symbol">★</span><span class="level-number">'+n+'</span>';
+card.title="Play Level "+n;
+}else{
+card.classList.add("locked");
+card.innerHTML='<span class="lock-symbol">🔒</span><span class="level-number">'+n+'</span>';
+card.title="Level Locked";
+card.disabled=true;
+}
+if(unlocked)card.onclick=function(){startGame(n);};
+grid.appendChild(card);
+}
+document.getElementById("levelProgress").textContent="⭐ UNLOCKED: "+maxUnlockedLevel+" / 200";
 }
 
-function openLevelSelect() {
-  renderLevelCards();
-
-  document.getElementById("homeScreen").style.display = "none";
-  document.getElementById("levelScreen").style.display = "block";
-  document.getElementById("homeSound").style.display = "block";
+function openLevelSelect(){
+renderLevelCards();
+document.getElementById("homeScreen").style.display="none";
+document.getElementById("levelScreen").style.display="block";
+document.getElementById("homeSound").style.display="block";
 }
 
-function closeLevelSelect() {
-  document.getElementById("levelScreen").style.display = "none";
-  document.getElementById("homeScreen").style.display = "flex";
+function closeLevelSelect(){
+document.getElementById("levelScreen").style.display="none";
+document.getElementById("homeScreen").style.display="flex";
 }
 
 /* SOUND SYSTEM */
+let soundEnabled=true;
+let audioContext=null;
+let musicTimer=null;
+let musicStep=0;
 
-let soundEnabled = true;
-let audioContext = null;
-let musicTimer = null;
-let musicStep = 0;
-
-function unlockAudio() {
-  try {
-    if (!audioContext) {
-      const AudioClass =
-        window.AudioContext || window.webkitAudioContext;
-
-      if (AudioClass) {
-        audioContext = new AudioClass();
-      }
-    }
-
-    if (audioContext && audioContext.state === "suspended") {
-      audioContext.resume();
-    }
-  } catch (e) {}
+function unlockAudio(){
+try{
+if(!audioContext){
+const AudioClass=window.AudioContext||window.webkitAudioContext;
+if(AudioClass)audioContext=new AudioClass();
+}
+if(audioContext&&audioContext.state==="suspended")audioContext.resume();
+}catch(e){}
 }
 
-/* SOUND EFFECT GENERATOR */
-
-function playTone(startFrequency, endFrequency, duration, type, volume) {
-  if (!soundEnabled) return;
-
-  try {
-    unlockAudio();
-    if (!audioContext) return;
-
-    const now = audioContext.currentTime;
-    const oscillator = audioContext.createOscillator();
-    const gain = audioContext.createGain();
-
-    oscillator.type = type || "sine";
-    oscillator.frequency.setValueAtTime(startFrequency, now);
-    oscillator.frequency.exponentialRampToValueAtTime(
-      Math.max(1, endFrequency), now + duration
-    );
-
-    oscillator.connect(gain);
-    gain.connect(audioContext.destination);
-
-    gain.gain.setValueAtTime(0.001, now);
-    gain.gain.linearRampToValueAtTime(volume || 0.15, now + 0.02);
-    gain.gain.exponentialRampToValueAtTime(
-      0.001, now + duration + 0.04
-    );
-
-    oscillator.start(now);
-    oscillator.stop(now + duration + 0.05);
-
-  } catch (e) {}
+function playTone(startFrequency,endFrequency,duration,type,volume){
+if(!soundEnabled)return;
+try{
+unlockAudio();
+if(!audioContext)return;
+const now=audioContext.currentTime;
+const oscillator=audioContext.createOscillator();
+const gain=audioContext.createGain();
+oscillator.type=type||"sine";
+oscillator.frequency.setValueAtTime(startFrequency,now);
+oscillator.frequency.exponentialRampToValueAtTime(Math.max(1,endFrequency),now+duration);
+oscillator.connect(gain);
+gain.connect(audioContext.destination);
+gain.gain.setValueAtTime(0.001,now);
+gain.gain.linearRampToValueAtTime(volume||0.15,now+0.02);
+gain.gain.exponentialRampToValueAtTime(0.001,now+duration+0.04);
+oscillator.start(now);
+oscillator.stop(now+duration+0.05);
+}catch(e){}
 }
 
-function playSound(type) {
-  if (!soundEnabled) return;
+function playSound(type){
+if(!soundEnabled)return;
+try{
+unlockAudio();
+if(!audioContext)return;
+const now=audioContext.currentTime;
 
-  try {
-    unlockAudio();
-    if (!audioContext) return;
+/* NEW GAME START SOUND */
+if(type==="start"){
+playTone(330,520,0.18,"triangle",0.20);
+setTimeout(()=>playTone(440,660,0.18,"triangle",0.20),160);
+setTimeout(()=>playTone(550,880,0.28,"sine",0.22),320);
+setTimeout(()=>playTone(660,990,0.35,"triangle",0.20),520);
+return;
+}
 
-    const now = audioContext.currentTime;
+if(type==="coin"){
+playTone(1050,1550,0.12,"sine",0.20);
+const coinSecond=audioContext.createOscillator();
+const coinGain=audioContext.createGain();
+coinSecond.type="sine";
+coinSecond.frequency.setValueAtTime(1750,now+0.09);
+coinSecond.connect(coinGain);
+coinGain.connect(audioContext.destination);
+coinGain.gain.setValueAtTime(0.001,now+0.09);
+coinGain.gain.linearRampToValueAtTime(0.13,now+0.11);
+coinGain.gain.exponentialRampToValueAtTime(0.001,now+0.25);
+coinSecond.start(now+0.09);
+coinSecond.stop(now+0.27);
+return;
+}
 
-    if (type === "coin") {
-      // Coin collection: bright two-part ting sound
-      playTone(1050, 1550, 0.12, "sine", 0.20);
+if(type==="banana"){
+playTone(520,850,0.12,"triangle",0.18);
+setTimeout(()=>{if(soundEnabled)playTone(720,430,0.16,"sine",0.13);},90);
+return;
+}
 
-      const coinSecond = audioContext.createOscillator();
-      const coinGain = audioContext.createGain();
-
-      coinSecond.type = "sine";
-      coinSecond.frequency.setValueAtTime(1750, now + 0.09);
-      coinSecond.connect(coinGain);
-      coinGain.connect(audioContext.destination);
-
-      coinGain.gain.setValueAtTime(0.001, now + 0.09);
-      coinGain.gain.linearRampToValueAtTime(0.13, now + 0.11);
-      coinGain.gain.exponentialRampToValueAtTime(
-        0.001, now + 0.25
-      );
-
-      coinSecond.start(now + 0.09);
-      coinSecond.stop(now + 0.27);
-      return;
-    }
-
-    if (type === "banana") {
-      // Banana collection: different soft pop/yum sound
-      playTone(520, 850, 0.12, "triangle", 0.18);
-      setTimeout(() => {
-        if (soundEnabled) {
-          playTone(720, 430, 0.16, "sine", 0.13);
-        }
-      }, 90);
-      return;
-    }
-
-    const sounds = {
-      play:  [450, 750, 0.20, "sine"],
-      jump:  [300, 650, 0.15, "sine"],
-      hit:   [180, 75, 0.25, "sawtooth"],
-      level: [500, 950, 0.30, "sine"],
-      over:  [350, 90, 0.40, "sawtooth"]
-    };
-
-    const data = sounds[type] || sounds.play;
-    playTone(data[0], data[1], data[2], data[3], 0.16);
-
-  } catch (e) {
-    console.log("Sound unavailable");
-  }
+const sounds={
+play:[450,750,0.20,"sine"],
+jump:[300,650,0.15,"sine"],
+hit:[180,75,0.25,"sawtooth"],
+level:[500,950,0.30,"sine"],
+over:[350,90,0.40,"sawtooth"]
+};
+const data=sounds[type]||sounds.play;
+playTone(data[0],data[1],data[2],data[3],0.16);
+}catch(e){console.log("Sound unavailable");}
 }
 
 /* JUNGLE BACKGROUND MUSIC */
+const jungleNotes=[261.63,329.63,392.00,329.63,293.66,349.23,440.00,349.23,261.63,329.63,392.00,523.25,440.00,392.00,329.63,293.66];
 
-const jungleNotes = [
-  261.63, 329.63, 392.00, 329.63,
-  293.66, 349.23, 440.00, 349.23,
-  261.63, 329.63, 392.00, 523.25,
-  440.00, 392.00, 329.63, 293.66
-];
-
-function playMusicNote() {
-  if (!audioContext || !soundEnabled) return;
-
-  try {
-    const now = audioContext.currentTime;
-    const note = jungleNotes[musicStep % jungleNotes.length];
-
-    const oscillator = audioContext.createOscillator();
-    const gain = audioContext.createGain();
-
-    oscillator.type = "triangle";
-    oscillator.frequency.setValueAtTime(note, now);
-
-    oscillator.connect(gain);
-    gain.connect(audioContext.destination);
-
-    gain.gain.setValueAtTime(0.001, now);
-    gain.gain.linearRampToValueAtTime(0.035, now + 0.04);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
-
-    oscillator.start(now);
-    oscillator.stop(now + 0.30);
-
-    // Soft bass note on every fourth music step
-    if (musicStep % 4 === 0) {
-      const bass = audioContext.createOscillator();
-      const bassGain = audioContext.createGain();
-
-      bass.type = "sine";
-      bass.frequency.setValueAtTime(note / 2, now);
-
-      bass.connect(bassGain);
-      bassGain.connect(audioContext.destination);
-
-      bassGain.gain.setValueAtTime(0.001, now);
-      bassGain.gain.linearRampToValueAtTime(0.025, now + 0.04);
-      bassGain.gain.exponentialRampToValueAtTime(
-        0.001, now + 0.35
-      );
-
-      bass.start(now);
-      bass.stop(now + 0.37);
-    }
-
-    musicStep++;
-
-  } catch (e) {}
+function playMusicNote(){
+if(!audioContext||!soundEnabled)return;
+try{
+const now=audioContext.currentTime;
+const note=jungleNotes[musicStep%jungleNotes.length];
+const oscillator=audioContext.createOscillator();
+const gain=audioContext.createGain();
+oscillator.type="triangle";
+oscillator.frequency.setValueAtTime(note,now);
+oscillator.connect(gain);
+gain.connect(audioContext.destination);
+gain.gain.setValueAtTime(0.001,now);
+gain.gain.linearRampToValueAtTime(0.035,now+0.04);
+gain.gain.exponentialRampToValueAtTime(0.001,now+0.28);
+oscillator.start(now);
+oscillator.stop(now+0.30);
+if(musicStep%4===0){
+const bass=audioContext.createOscillator();
+const bassGain=audioContext.createGain();
+bass.type="sine";
+bass.frequency.setValueAtTime(note/2,now);
+bass.connect(bassGain);
+bassGain.connect(audioContext.destination);
+bassGain.gain.setValueAtTime(0.001,now);
+bassGain.gain.linearRampToValueAtTime(0.025,now+0.04);
+bassGain.gain.exponentialRampToValueAtTime(0.001,now+0.35);
+bass.start(now);
+bass.stop(now+0.37);
+}
+musicStep++;
+}catch(e){}
 }
 
-function startBackgroundMusic() {
-  if (!soundEnabled || !running || paused || gameOver) return;
-
-  unlockAudio();
-  stopBackgroundMusic();
-
-  musicStep = 0;
-  playMusicNote();
-
-  musicTimer = setInterval(() => {
-    if (!soundEnabled || !running || paused || gameOver) {
-      stopBackgroundMusic();
-      return;
-    }
-
-    playMusicNote();
-  }, 320);
+function startBackgroundMusic(){
+if(!soundEnabled||!running||paused||gameOver)return;
+unlockAudio();
+stopBackgroundMusic();
+musicStep=0;
+playMusicNote();
+musicTimer=setInterval(()=>{
+if(!soundEnabled||!running||paused||gameOver){stopBackgroundMusic();return;}
+playMusicNote();
+},320);
 }
 
-function stopBackgroundMusic() {
-  if (musicTimer !== null) {
-    clearInterval(musicTimer);
-    musicTimer = null;
-  }
+function stopBackgroundMusic(){
+if(musicTimer!==null){clearInterval(musicTimer);musicTimer=null;}
 }
 
-function updateSoundButtons() {
-  const label = soundEnabled ? "🔊 SOUND ON" : "🔇 SOUND OFF";
-
-  document.getElementById("homeSound").textContent = label;
-  document.getElementById("gameSound").textContent =
-    soundEnabled ? "🔊 SOUND" : "🔇 MUTED";
+function updateSoundButtons(){
+const label=soundEnabled?"🔊 SOUND ON":"🔇 SOUND OFF";
+document.getElementById("homeSound").textContent=label;
+document.getElementById("gameSound").textContent=soundEnabled?"🔊 SOUND":"🔇 MUTED";
 }
 
-function toggleSound() {
-  soundEnabled = !soundEnabled;
-  updateSoundButtons();
-
-  if (soundEnabled) {
-    unlockAudio();
-    playSound("play");
-    startBackgroundMusic();
-  } else {
-    stopBackgroundMusic();
-  }
+function toggleSound(){
+soundEnabled=!soundEnabled;
+updateSoundButtons();
+if(soundEnabled){
+unlockAudio();
+playSound("play");
+startBackgroundMusic();
+}else stopBackgroundMusic();
 }
 
 /* GAME IMAGES */
+const bgImage=new Image();
+bgImage.src="jungle-bg.png";
+let bgLoaded=false;
+bgImage.onload=()=>{bgLoaded=true;draw();};
 
-const bgImage = new Image();
-bgImage.src = "jungle-bg.png";
-let bgLoaded = false;
+const runImage=new Image();
+runImage.src="monkey-run.png";
+let runLoaded=false;
+runImage.onload=()=>{runLoaded=true;draw();};
 
-bgImage.onload = () => {
-  bgLoaded = true;
-  draw();
-};
+const stillImage=new Image();
+stillImage.src="monkey.png";
+let stillLoaded=false;
+stillImage.onload=()=>{stillLoaded=true;draw();};
 
-const runImage = new Image();
-runImage.src = "monkey-run.png";
-let runLoaded = false;
-
-runImage.onload = () => {
-  runLoaded = true;
-  draw();
-};
-
-const stillImage = new Image();
-stillImage.src = "monkey.png";
-let stillLoaded = false;
-
-stillImage.onload = () => {
-  stillLoaded = true;
-  draw();
-};
-
-/* LEVEL BACKGROUND IMAGES */
-
-const levelBackgrounds = [];
-
-for (let i = 1; i <= 8; i++) {
-  const image = new Image();
-  image.src = "bg" + i + ".png";
-
-  image.onload = () => {
-    draw();
-  };
-
-  levelBackgrounds.push(image);
+const levelBackgrounds=[];
+for(let i=1;i<=8;i++){
+const image=new Image();
+image.src="bg"+i+".png";
+image.onload=()=>{draw();};
+levelBackgrounds.push(image);
 }
 
-/* VICTORY ANIMATION IMAGE */
-
-const victoryImage = new Image();
-victoryImage.src = "victory.png";
-let victoryLoaded = false;
-
-victoryImage.onload = () => {
-  victoryLoaded = true;
-  draw();
-};
+const victoryImage=new Image();
+victoryImage.src="victory.png";
+let victoryLoaded=false;
+victoryImage.onload=()=>{victoryLoaded=true;draw();};
 
 /* GAME VARIABLES */
+let running=false;
+let paused=false;
+let gameOver=false;
+let victoryActive=false;
+let level=1;
+let score=0;
+let coins=0;
+let lives=3;
+let timeLeft=120;
+let bananasCollected=0;
+let lastTime=0;
+let animationTime=0;
+let spawnTimer=0;
+let coinTimer=0;
+let invulnerable=0;
+let obstacles=[];
+let treasures=[];
 
-let running = false;
-let paused = false;
-let gameOver = false;
-let victoryActive = false;
+const player={x:110,y:255,w:125,h:140,vy:0,ground:true};
+const groundY=395;
 
-let level = 1;
-let score = 0;
-let coins = 0;
-let lives = 3;
-let timeLeft = 120;
-
-/* BANANA HEALTH COUNTER */
-
-let bananasCollected = 0;
-
-let lastTime = 0;
-let animationTime = 0;
-let spawnTimer = 0;
-let coinTimer = 0;
-let invulnerable = 0;
-
-let obstacles = [];
-let treasures = [];
-
-/* BIGGER GAMEPLAY MONKEY */
-
-const player = {
-  x: 110,
-  y: 255,
-  w: 125,
-  h: 140,
-  vy: 0,
-  ground: true
-};
-
-const groundY = 395;
-
-/* LEVEL TIME SETTINGS */
-
-function levelDuration(n) {
-  if (n <= 25) return 120;
-  if (n <= 50) return 150;
-  if (n <= 75) return 180;
-  if (n <= 100) return 210;
-  if (n <= 125) return 240;
-  if (n <= 150) return 270;
-  if (n <= 175) return 300;
-  return 330;
+function levelDuration(n){
+if(n<=25)return 120;
+if(n<=50)return 150;
+if(n<=75)return 180;
+if(n<=100)return 210;
+if(n<=125)return 240;
+if(n<=150)return 270;
+if(n<=175)return 300;
+return 330;
 }
 
-/* SPEED INCREASES EVERY 25 LEVELS */
-
-function difficulty() {
-  if (level <= 25) return 0.75;
-  if (level <= 50) return 0.90;
-  if (level <= 75) return 1.05;
-  if (level <= 100) return 1.20;
-  if (level <= 125) return 1.35;
-  if (level <= 150) return 1.50;
-  if (level <= 175) return 1.70;
-  return 1.90;
+function difficulty(){
+if(level<=25)return 0.75;
+if(level<=50)return 0.90;
+if(level<=75)return 1.05;
+if(level<=100)return 1.20;
+if(level<=125)return 1.35;
+if(level<=150)return 1.50;
+if(level<=175)return 1.70;
+return 1.90;
 }
 
-function formatTime(t) {
-  let m = Math.floor(t / 60);
-  let s = Math.floor(t % 60);
-
-  return String(m).padStart(2, "0") + ":" +
-         String(s).padStart(2, "0");
+function formatTime(t){
+let m=Math.floor(t/60);
+let s=Math.floor(t%60);
+return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
 }
 
-function updateInfo() {
-  document.getElementById("level").textContent =
-    "Level: " + level + "/200";
-
-  document.getElementById("score").textContent =
-    "Score: " + score;
-
-  document.getElementById("coins").textContent =
-    "Coins: " + coins;
-
-  document.getElementById("lives").textContent =
-    "❤️".repeat(lives) + "🖤".repeat(3-lives);
-
-  document.getElementById("timer").textContent =
-    formatTime(timeLeft);
+function updateInfo(){
+document.getElementById("level").textContent="Level: "+level+"/200";
+document.getElementById("score").textContent="Score: "+score;
+document.getElementById("coins").textContent="Coins: "+coins;
+document.getElementById("lives").textContent="❤️".repeat(lives)+"🖤".repeat(3-lives);
+document.getElementById("timer").textContent=formatTime(timeLeft);
 }
 
-function showGame() {
-  document.getElementById("homeScreen").style.display = "none";
-  document.getElementById("levelScreen").style.display = "none";
-  document.getElementById("homeSound").style.display = "none";
-  document.getElementById("levelCompleteScreen").style.display = "none";
-  document.getElementById("hud").style.display = "block";
-  document.getElementById("message").style.display = "block";
+function showGame(){
+document.getElementById("homeScreen").style.display="none";
+document.getElementById("levelScreen").style.display="none";
+document.getElementById("homeSound").style.display="none";
+document.getElementById("levelCompleteScreen").style.display="none";
+document.getElementById("hud").style.display="block";
+document.getElementById("message").style.display="block";
 }
 
-function startGame(selectedLevel = 1) {
-  unlockAudio();
-  playSound("play");
-
-  victoryActive = false;
-
-  level = selectedLevel;
-  score = 0;
-  coins = 0;
-
-  /* EVERY NEW GAME STARTS WITH 3 HEARTS */
-  lives = 3;
-
-  timeLeft = levelDuration(level);
-
-  bananasCollected = 0;
-
-  obstacles = [];
-  treasures = [];
-
-  spawnTimer = 0;
-  coinTimer = 0;
-  invulnerable = 0;
-
-  player.x = 110;
-  player.y = groundY - player.h;
-  player.vy = 0;
-  player.ground = true;
-
-  running = true;
-  paused = false;
-  gameOver = false;
-
-  lastTime = 0;
-  animationTime = 0;
-
-  showGame();
-
-  document.getElementById("message").textContent =
-    "RUN MONKEY! COLLECT COINS AND BANANAS!";
-
-  updateInfo();
-  draw();
-
-  startBackgroundMusic();
-
-  requestAnimationFrame(loop);
+function startGame(selectedLevel=1){
+unlockAudio();
+playSound("start");
+victoryActive=false;
+level=selectedLevel;
+score=0;
+coins=0;
+lives=3;
+timeLeft=levelDuration(level);
+bananasCollected=0;
+obstacles=[];
+treasures=[];
+spawnTimer=0;
+coinTimer=0;
+invulnerable=0;
+player.x=110;
+player.y=groundY-player.h;
+player.vy=0;
+player.ground=true;
+running=true;
+paused=false;
+gameOver=false;
+lastTime=0;
+animationTime=0;
+showGame();
+document.getElementById("message").textContent="RUN MONKEY! COLLECT COINS AND BANANAS!";
+updateInfo();
+draw();
+startBackgroundMusic();
+requestAnimationFrame(loop);
 }
 
-/* JUMP POWER REDUCED BY 1 POINT */
-
-function jump() {
-  if (!running || paused || gameOver) return;
-
-  if (player.ground) {
-    player.vy = -21;
-    player.ground = false;
-    playSound("jump");
-  }
+function jump(){
+if(!running||paused||gameOver)return;
+if(player.ground){
+player.vy=-21;
+player.ground=false;
+playSound("jump");
+}
 }
 
-function togglePause() {
-  if (!running || gameOver) return;
-
-  paused = !paused;
-
-  if (paused) {
-    stopBackgroundMusic();
-  } else {
-    startBackgroundMusic();
-  }
-
-  document.getElementById("message").textContent =
-    paused ? "⏸ GAME PAUSED" : "KEEP RUNNING!";
-
-  if (!paused) {
-    lastTime = 0;
-    requestAnimationFrame(loop);
-  } else {
-    draw();
-  }
+function togglePause(){
+if(!running||gameOver)return;
+paused=!paused;
+if(paused)stopBackgroundMusic();
+else startBackgroundMusic();
+document.getElementById("message").textContent=paused?"⏸ GAME PAUSED":"KEEP RUNNING!";
+if(!paused){lastTime=0;requestAnimationFrame(loop);}
+else draw();
 }
 
-canvas.addEventListener("pointerdown", jump);
-
-document.addEventListener("keydown", e => {
-  if (e.code === "Space" || e.code === "ArrowUp") {
-    e.preventDefault();
-    jump();
-  }
+canvas.addEventListener("pointerdown",jump);
+document.addEventListener("keydown",e=>{
+if(e.code==="Space"||e.code==="ArrowUp"){e.preventDefault();jump();}
 });
 
-function drawBackground() {
-
-  /* SELECT BACKGROUND FOR CURRENT LEVEL */
-
-  let selectedBackground = null;
-
-  if (running || victoryActive) {
-    const backgroundIndex = Math.floor((level - 1) / 25);
-    selectedBackground = levelBackgrounds[backgroundIndex];
-  }
-
-  if (selectedBackground && selectedBackground.complete &&
-      selectedBackground.naturalWidth > 0) {
-
-    ctx.drawImage(selectedBackground, 0, 0, 900, 450);
-    return;
-  }
-
-  /* ORIGINAL JUNGLE BACKGROUND FALLBACK */
-
-  if (bgLoaded) {
-    ctx.drawImage(bgImage, 0, 0, 900, 450);
-    return;
-  }
-
-  let sky = ctx.createLinearGradient(0,0,0,450);
-  sky.addColorStop(0,"#54c9ff");
-  sky.addColorStop(1,"#d4f6ff");
-
-  ctx.fillStyle = sky;
-  ctx.fillRect(0,0,900,450);
-
-  ctx.fillStyle = "#fff";
-  drawCloud(150,75);
-  drawCloud(430,110);
-  drawCloud(730,65);
-
-  ctx.fillStyle = "#60b85b";
-  ctx.beginPath();
-  ctx.moveTo(0,310);
-  ctx.quadraticCurveTo(230,170,460,310);
-  ctx.quadraticCurveTo(680,185,900,300);
-  ctx.lineTo(900,450);
-  ctx.lineTo(0,450);
-  ctx.fill();
-
-  ctx.fillStyle = "#4b963f";
-  ctx.fillRect(0,groundY,900,55);
-
-  ctx.fillStyle = "#77502e";
-  ctx.fillRect(0,groundY+15,900,40);
-
-  ctx.fillStyle = "#f6d88a";
-
-  for(let x=0;x<900;x+=80) {
-    ctx.fillRect(x,groundY+25,40,5);
-  }
+function drawBackground(){
+let selectedBackground=null;
+if(running||victoryActive){
+const backgroundIndex=Math.floor((level-1)/25);
+selectedBackground=levelBackgrounds[backgroundIndex];
+}
+if(selectedBackground&&selectedBackground.complete&&selectedBackground.naturalWidth>0){
+ctx.drawImage(selectedBackground,0,0,900,450);
+return;
+}
+if(bgLoaded){ctx.drawImage(bgImage,0,0,900,450);return;}
+let sky=ctx.createLinearGradient(0,0,0,450);
+sky.addColorStop(0,"#54c9ff");
+sky.addColorStop(1,"#d4f6ff");
+ctx.fillStyle=sky;
+ctx.fillRect(0,0,900,450);
+ctx.fillStyle="#fff";
+drawCloud(150,75);drawCloud(430,110);drawCloud(730,65);
+ctx.fillStyle="#60b85b";
+ctx.beginPath();
+ctx.moveTo(0,310);
+ctx.quadraticCurveTo(230,170,460,310);
+ctx.quadraticCurveTo(680,185,900,300);
+ctx.lineTo(900,450);ctx.lineTo(0,450);ctx.fill();
+ctx.fillStyle="#4b963f";ctx.fillRect(0,groundY,900,55);
+ctx.fillStyle="#77502e";ctx.fillRect(0,groundY+15,900,40);
+ctx.fillStyle="#f6d88a";
+for(let x=0;x<900;x+=80)ctx.fillRect(x,groundY+25,40,5);
 }
 
-function drawCloud(x,y) {
-  ctx.beginPath();
-  ctx.arc(x,y,22,0,Math.PI*2);
-  ctx.arc(x+25,y-12,28,0,Math.PI*2);
-  ctx.arc(x+55,y,22,0,Math.PI*2);
-  ctx.fill();
+function drawCloud(x,y){
+ctx.beginPath();
+ctx.arc(x,y,22,0,Math.PI*2);
+ctx.arc(x+25,y-12,28,0,Math.PI*2);
+ctx.arc(x+55,y,22,0,Math.PI*2);
+ctx.fill();
 }
 
-/* JUMPING SHADOW */
-
-function drawMonkeyShadow() {
-  const heightAboveGround =
-    Math.max(0, groundY - (player.y + player.h));
-
-  const shadowWidth =
-    Math.max(30, 100 - heightAboveGround * 0.25);
-
-  const shadowOpacity =
-    Math.max(0.10, 0.35 - heightAboveGround * 0.001);
-
-  ctx.save();
-
-  ctx.fillStyle =
-    "rgba(0,0,0," + shadowOpacity + ")";
-
-  ctx.beginPath();
-
-  ctx.ellipse(
-    player.x + player.w / 2,
-    groundY + 5,
-    shadowWidth / 2,
-    8,
-    0,
-    0,
-    Math.PI * 2
-  );
-
-  ctx.fill();
-  ctx.restore();
+function drawMonkeyShadow(){
+const heightAboveGround=Math.max(0,groundY-(player.y+player.h));
+const shadowWidth=Math.max(30,100-heightAboveGround*0.25);
+const shadowOpacity=Math.max(0.10,0.35-heightAboveGround*0.001);
+ctx.save();
+ctx.fillStyle="rgba(0,0,0,"+shadowOpacity+")";
+ctx.beginPath();
+ctx.ellipse(player.x+player.w/2,groundY+5,shadowWidth/2,8,0,0,Math.PI*2);
+ctx.fill();
+ctx.restore();
 }
 
-function drawMonkey() {
-
-  /* VICTORY SPRITE ANIMATION */
-
-  if (victoryActive && victoryLoaded) {
-    const fw = victoryImage.naturalWidth / 4;
-    const fh = victoryImage.naturalHeight;
-
-    const frame = Math.floor(animationTime / 160) % 4;
-
-    ctx.drawImage(
-      victoryImage,
-      frame * fw, 0, fw, fh,
-      player.x, player.y, player.w, player.h
-    );
-
-    return;
-  }
-
-  if(invulnerable>0 &&
-     Math.floor(animationTime/70)%2===0) return;
-
-  if(runLoaded) {
-    const fw=runImage.naturalWidth/4;
-    const fh=runImage.naturalHeight;
-    const frame=Math.floor(animationTime/110)%4;
-
-    ctx.drawImage(
-      runImage,
-      frame*fw,0,fw,fh,
-      player.x,player.y,player.w,player.h
-    );
-  } else if(stillLoaded) {
-    ctx.drawImage(
-      stillImage,
-      player.x,player.y,player.w,player.h
-    );
-  } else {
-    ctx.font="100px Arial";
-    ctx.fillText("🐵",player.x,player.y+105);
-  }
+function drawMonkey(){
+if(victoryActive&&victoryLoaded){
+const fw=victoryImage.naturalWidth/4;
+const fh=victoryImage.naturalHeight;
+const frame=Math.floor(animationTime/160)%4;
+ctx.drawImage(victoryImage,frame*fw,0,fw,fh,player.x,player.y,player.w,player.h);
+return;
+}
+if(invulnerable>0&&Math.floor(animationTime/70)%2===0)return;
+if(runLoaded){
+const fw=runImage.naturalWidth/4;
+const fh=runImage.naturalHeight;
+const frame=Math.floor(animationTime/110)%4;
+ctx.drawImage(runImage,frame*fw,0,fw,fh,player.x,player.y,player.w,player.h);
+}else if(stillLoaded){
+ctx.drawImage(stillImage,player.x,player.y,player.w,player.h);
+}else{
+ctx.font="100px Arial";
+ctx.fillText("🐵",player.x,player.y+105);
+}
 }
 
-function drawObstacle(o) {
-  ctx.fillStyle="#995522";
-  ctx.fillRect(o.x,o.y,o.w,o.h);
-
-  ctx.strokeStyle="#512c12";
-  ctx.lineWidth=5;
-  ctx.strokeRect(o.x,o.y,o.w,o.h);
-
-  ctx.beginPath();
-  ctx.moveTo(o.x,o.y+o.h/2);
-  ctx.lineTo(o.x+o.w,o.y+o.h/2);
-  ctx.stroke();
+function drawObstacle(o){
+ctx.fillStyle="#995522";
+ctx.fillRect(o.x,o.y,o.w,o.h);
+ctx.strokeStyle="#512c12";
+ctx.lineWidth=5;
+ctx.strokeRect(o.x,o.y,o.w,o.h);
+ctx.beginPath();
+ctx.moveTo(o.x,o.y+o.h/2);
+ctx.lineTo(o.x+o.w,o.y+o.h/2);
+ctx.stroke();
 }
 
-function drawTreasure(t) {
-  ctx.font="30px Arial";
-  ctx.fillText(t.type==="coin"?"🪙":"🍌",t.x,t.y);
+function drawTreasure(t){
+ctx.font="30px Arial";
+ctx.fillText(t.type==="coin"?"🪙":"🍌",t.x,t.y);
 }
 
-function spawnObjects(dt) {
-  spawnTimer+=dt;
-  coinTimer+=dt;
-
-  if(spawnTimer>Math.max(0.75,1.7/difficulty())) {
-    obstacles.push({
-      x:930,
-      y:groundY-48,
-      w:48,
-      h:48
-    });
-
-    spawnTimer=0;
-  }
-
-  if(coinTimer>1.15) {
-    treasures.push({
-      x:930,
-      y:220+Math.random()*100,
-      type:Math.random()<0.55?"coin":"banana"
-    });
-
-    coinTimer=0;
-  }
+function spawnObjects(dt){
+spawnTimer+=dt;
+coinTimer+=dt;
+if(spawnTimer>Math.max(0.75,1.7/difficulty())){
+obstacles.push({x:930,y:groundY-48,w:48,h:48});
+spawnTimer=0;
+}
+if(coinTimer>1.15){
+treasures.push({x:930,y:220+Math.random()*100,type:Math.random()<0.55?"coin":"banana"});
+coinTimer=0;
+}
 }
 
-function hit(a,b) {
-  return a.x+15<b.x+b.w &&
-    a.x+a.w-15>b.x &&
-    a.y+12<b.y+b.h &&
-    a.y+a.h-10>b.y;
+function hit(a,b){
+return a.x+15<b.x+b.w&&a.x+a.w-15>b.x&&a.y+12<b.y+b.h&&a.y+a.h-10>b.y;
 }
 
-/* LEVEL COMPLETE CARD SYSTEM */
+function nextLevel(){
+stopBackgroundMusic();
+completeLevel(level);
+running=false;
+paused=false;
+const screen=document.getElementById("levelCompleteScreen");
+const title=document.getElementById("completeTitle");
+const levelText=document.getElementById("completeLevelText");
+const unlocked=document.getElementById("completeUnlocked");
+const button=document.getElementById("nextLevelButton");
+const finalMessage=document.getElementById("finalMessage");
+const monkey=document.getElementById("completeMonkey");
+playSound("level");
 
-function nextLevel() {
-
-  /* STOP MUSIC WHEN LEVEL CARD OPENS */
-  stopBackgroundMusic();
-
-  /* CURRENT LEVEL SUCCESS AND SAVE */
-
-  completeLevel(level);
-
-  running = false;
-  paused = false;
-
-  const screen = document.getElementById("levelCompleteScreen");
-  const title = document.getElementById("completeTitle");
-  const levelText = document.getElementById("completeLevelText");
-  const unlocked = document.getElementById("completeUnlocked");
-  const button = document.getElementById("nextLevelButton");
-  const finalMessage = document.getElementById("finalMessage");
-  const monkey = document.getElementById("completeMonkey");
-
-  playSound("level");
-
-  if(level >= 200) {
-
-    /* FINAL CHAMPION CARD */
-
-    victoryActive = true;
-    gameOver = true;
-
-    player.y = groundY-player.h;
-    player.vy = 0;
-    player.ground = true;
-
-    title.textContent = "FINAL CHAMPION!";
-    monkey.textContent = "👑🐵🏆";
-    levelText.textContent = "ALL 200 LEVELS COMPLETED!";
-    unlocked.style.display = "none";
-
-    finalMessage.style.display = "block";
-    button.textContent = "🏆 BACK TO LEVELS";
-
-    screen.style.display = "flex";
-
-    animationTime = 0;
-    requestAnimationFrame(victoryLoop);
-
-    return;
-  }
-
-  /* NORMAL LEVEL COMPLETE CARD */
-
-  victoryActive = false;
-  gameOver = false;
-
-  title.textContent = "LEVEL COMPLETE!";
-  monkey.textContent = "🐵🎉";
-
-  levelText.textContent =
-    "LEVEL " + level + " COMPLETE";
-
-  unlocked.style.display = "block";
-  unlocked.textContent =
-    "🔓 LEVEL " + (level + 1) + " UNLOCKED!";
-
-  finalMessage.style.display = "none";
-  button.textContent = "▶ NEXT LEVEL";
-
-  screen.style.display = "flex";
+if(level>=200){
+victoryActive=true;
+gameOver=true;
+player.y=groundY-player.h;
+player.vy=0;
+player.ground=true;
+title.textContent="FINAL CHAMPION!";
+monkey.textContent="👑🐵🏆";
+levelText.textContent="ALL 200 LEVELS COMPLETED!";
+unlocked.style.display="none";
+finalMessage.style.display="block";
+button.textContent="🏆 BACK TO LEVELS";
+screen.style.display="flex";
+animationTime=0;
+requestAnimationFrame(victoryLoop);
+return;
 }
 
-/* NEXT LEVEL BUTTON */
-
-function continueAfterCard() {
-
-  const screen = document.getElementById("levelCompleteScreen");
-
-  /* FINAL LEVEL BUTTON */
-
-  if(level >= 200) {
-
-    screen.style.display = "none";
-
-    victoryActive = false;
-    gameOver = false;
-    running = false;
-
-    document.getElementById("hud").style.display = "none";
-    document.getElementById("message").style.display = "none";
-
-    openLevelSelect();
-    return;
-  }
-
-  screen.style.display = "none";
-
-  /* START NEXT LEVEL */
-
-  level++;
-
-  /* EVERY NEW LEVEL STARTS WITH FULL 3 HEARTS */
-  lives = 3;
-
-  timeLeft = levelDuration(level);
-
-  obstacles = [];
-  treasures = [];
-
-  spawnTimer = 0;
-  coinTimer = 0;
-  invulnerable = 0;
-
-  player.x = 110;
-  player.y = groundY - player.h;
-  player.vy = 0;
-  player.ground = true;
-
-  running = true;
-  paused = false;
-  gameOver = false;
-  victoryActive = false;
-
-  lastTime = 0;
-
-  document.getElementById("message").textContent =
-    "🎉 LEVEL " + level + " STARTED! ❤️❤️❤️";
-
-  updateInfo();
-  draw();
-
-  startBackgroundMusic();
-
-  requestAnimationFrame(loop);
+victoryActive=false;
+gameOver=false;
+title.textContent="LEVEL COMPLETE!";
+monkey.textContent="🐵🎉";
+levelText.textContent="LEVEL "+level+" COMPLETE";
+unlocked.style.display="block";
+unlocked.textContent="🔓 LEVEL "+(level+1)+" UNLOCKED!";
+finalMessage.style.display="none";
+button.textContent="▶ NEXT LEVEL";
+screen.style.display="flex";
 }
 
-function endGame() {
-  running=false;
-  gameOver=true;
+function continueAfterCard(){
+const screen=document.getElementById("levelCompleteScreen");
+if(level>=200){
+screen.style.display="none";
+victoryActive=false;
+gameOver=false;
+running=false;
+document.getElementById("hud").style.display="none";
+document.getElementById("message").style.display="none";
+openLevelSelect();
+return;
+}
+screen.style.display="none";
+level++;
+lives=3;
+timeLeft=levelDuration(level);
+obstacles=[];
+treasures=[];
+spawnTimer=0;
+coinTimer=0;
+invulnerable=0;
+player.x=110;
+player.y=groundY-player.h;
+player.vy=0;
+player.ground=true;
+running=true;
+paused=false;
+gameOver=false;
+victoryActive=false;
+lastTime=0;
+document.getElementById("message").textContent="🎉 LEVEL "+level+" STARTED! ❤️❤️❤️";
+updateInfo();
+draw();
 
-  /* STOP BACKGROUND MUSIC ON GAME OVER */
-  stopBackgroundMusic();
-
-  victoryActive=false;
-
-  playSound("over");
-
-  document.getElementById("message").textContent =
-    "GAME OVER! SCORE: "+score;
-
-  document.getElementById("hud").style.display = "none";
-  document.getElementById("homeScreen").style.display = "flex";
-  document.getElementById("homeSound").style.display = "block";
-
-  drawHome();
+/* START SOUND FOR EVERY NEW LEVEL */
+playSound("start");
+startBackgroundMusic();
+requestAnimationFrame(loop);
 }
 
-function update(dt) {
-  animationTime+=dt*1000;
-
-  if(invulnerable>0) invulnerable-=dt*1000;
-
-  timeLeft-=dt;
-
-  if(timeLeft<=0) {
-    nextLevel();
-    return;
-  }
-
-  score+=Math.floor(dt*10);
-
-  /* JUMP GRAVITY ADJUSTMENT */
-  player.vy+=0.58;
-  player.y+=player.vy;
-
-  if(player.y+player.h>=groundY) {
-    player.y=groundY-player.h;
-    player.vy=0;
-    player.ground=true;
-  }
-
-  spawnObjects(dt);
-
-  let speed=300*difficulty();
-
-  obstacles.forEach(o=>o.x-=speed*dt);
-  treasures.forEach(t=>t.x-=speed*dt);
-
-  obstacles=obstacles.filter(o=>o.x+o.w>0);
-  treasures=treasures.filter(t=>t.x+35>0);
-
-  for(let i=0;i<obstacles.length;i++) {
-    if(hit(player,obstacles[i])&&invulnerable<=0) {
-      lives--;
-      invulnerable=1500;
-
-      playSound("hit");
-      obstacles.splice(i,1);
-
-      if(lives<=0) {
-        endGame();
-        return;
-      }
-
-      break;
-    }
-  }
-
-  for(let i=treasures.length-1;i>=0;i--) {
-    let t=treasures[i];
-
-    let box={
-      x:t.x,
-      y:t.y-25,
-      w:30,
-      h:30
-    };
-
-    if(hit(player,box)) {
-      if(t.type==="coin") {
-        coins++;
-        playSound("coin");
-      } else {
-        score+=50;
-        playSound("banana");
-
-        /* EVERY 10 BANANAS GIVE 1 HEALTH */
-        bananasCollected++;
-
-        if(bananasCollected % 10 === 0 && lives < 3) {
-          lives++;
-
-          document.getElementById("message").textContent =
-            "❤️ 10 BANANAS! EXTRA HEALTH!";
-        }
-      }
-
-      treasures.splice(i,1);
-    }
-  }
-
-  updateInfo();
+function endGame(){
+running=false;
+gameOver=true;
+stopBackgroundMusic();
+victoryActive=false;
+playSound("over");
+document.getElementById("message").textContent="GAME OVER! SCORE: "+score;
+document.getElementById("hud").style.display="none";
+document.getElementById("homeScreen").style.display="flex";
+document.getElementById("homeSound").style.display="block";
+drawHome();
 }
 
-function drawHome() {
-  drawBackground();
+function update(dt){
+animationTime+=dt*1000;
+if(invulnerable>0)invulnerable-=dt*1000;
+timeLeft-=dt;
+if(timeLeft<=0){nextLevel();return;}
+score+=Math.floor(dt*10);
+player.vy+=0.58;
+player.y+=player.vy;
+if(player.y+player.h>=groundY){
+player.y=groundY-player.h;
+player.vy=0;
+player.ground=true;
+}
+spawnObjects(dt);
+let speed=300*difficulty();
+obstacles.forEach(o=>o.x-=speed*dt);
+treasures.forEach(t=>t.x-=speed*dt);
+obstacles=obstacles.filter(o=>o.x+o.w>0);
+treasures=treasures.filter(t=>t.x+35>0);
+
+for(let i=0;i<obstacles.length;i++){
+if(hit(player,obstacles[i])&&invulnerable<=0){
+lives--;
+invulnerable=1500;
+playSound("hit");
+obstacles.splice(i,1);
+if(lives<=0){endGame();return;}
+break;
+}
 }
 
-function draw() {
-  if (!running && !gameOver) {
-    drawHome();
-    return;
-  }
-
-  drawBackground();
-
-  obstacles.forEach(drawObstacle);
-  treasures.forEach(drawTreasure);
-
-  drawMonkeyShadow();
-  drawMonkey();
-
-  if(paused || gameOver) {
-    ctx.fillStyle="rgba(0,0,0,.5)";
-    ctx.fillRect(0,0,900,450);
-
-    ctx.fillStyle="white";
-    ctx.font="bold 48px Arial";
-    ctx.textAlign="center";
-
-    ctx.fillText(
-      paused?"PAUSED":
-      (level>=200?"CHAMPION!":"GAME OVER"),
-      450,220
-    );
-
-    ctx.textAlign="left";
-  }
+for(let i=treasures.length-1;i>=0;i--){
+let t=treasures[i];
+let box={x:t.x,y:t.y-25,w:30,h:30};
+if(hit(player,box)){
+if(t.type==="coin"){
+coins++;
+playSound("coin");
+}else{
+score+=50;
+playSound("banana");
+bananasCollected++;
+if(bananasCollected%10===0&&lives<3){
+lives++;
+document.getElementById("message").textContent="❤️ 10 BANANAS! EXTRA HEALTH!";
+}
+}
+treasures.splice(i,1);
+}
+}
+updateInfo();
 }
 
-/* VICTORY ANIMATION LOOP */
+function drawHome(){drawBackground();}
 
-function victoryLoop() {
-  if (!victoryActive) return;
-
-  animationTime += 16;
-  draw();
-
-  requestAnimationFrame(victoryLoop);
+function draw(){
+if(!running&&!gameOver){drawHome();return;}
+drawBackground();
+obstacles.forEach(drawObstacle);
+treasures.forEach(drawTreasure);
+drawMonkeyShadow();
+drawMonkey();
+if(paused||gameOver){
+ctx.fillStyle="rgba(0,0,0,.5)";
+ctx.fillRect(0,0,900,450);
+ctx.fillStyle="white";
+ctx.font="bold 48px Arial";
+ctx.textAlign="center";
+ctx.fillText(paused?"PAUSED":(level>=200?"CHAMPION!":"GAME OVER"),450,220);
+ctx.textAlign="left";
+}
 }
 
-function loop(timestamp) {
-  if(!running||paused||gameOver) return;
+function victoryLoop(){
+if(!victoryActive)return;
+animationTime+=16;
+draw();
+requestAnimationFrame(victoryLoop);
+}
 
-  if(!lastTime) lastTime=timestamp;
-
-  let dt=Math.min((timestamp-lastTime)/1000,0.04);
-
-  lastTime=timestamp;
-
-  update(dt);
-  draw();
-
-  if(running&&!paused&&!gameOver) {
-    requestAnimationFrame(loop);
-  }
+function loop(timestamp){
+if(!running||paused||gameOver)return;
+if(!lastTime)lastTime=timestamp;
+let dt=Math.min((timestamp-lastTime)/1000,0.04);
+lastTime=timestamp;
+update(dt);
+draw();
+if(running&&!paused&&!gameOver)requestAnimationFrame(loop);
 }
 
 /* STARTUP */
-
 loadLevelProgress();
 renderLevelCards();
 updateSoundButtons();
 draw();
 updateInfo();
 </script>
-
 </body>
 </html>
